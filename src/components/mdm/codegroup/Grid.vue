@@ -1,5 +1,5 @@
 <template>
-    <ag-grid-vue style="height: 500px;"
+    <InputAgGrid style="height: 500px;"
         class="ag-theme-alpine"
         ref="codeGroups"
 
@@ -8,23 +8,19 @@
 
         :columnDefs="columnDefs"
         :options="options"
-    > 
-    </ag-grid-vue>
+    /> 
 </template>
 
 <script>
-import "ag-grid-enterprise/dist/styles/ag-grid.css";
-import "ag-grid-enterprise/dist/styles/ag-theme-alpine.css";
-import { AgGridVue } from "ag-grid-vue3";
 
-import * as moment from 'moment'
+import moment from 'moment'
 
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
     name: 'CodegroupGrid',
     components: {
-      AgGridVue
+      
     },
 
   props: {

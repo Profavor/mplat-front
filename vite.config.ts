@@ -26,7 +26,7 @@ export default ({ command, mode }) => {
   if (command === 'build' && mode === 'staging') {
     return Object.assign(
       {
-        base: '/admin-work',
+        base: '/',
       },
       config
     )

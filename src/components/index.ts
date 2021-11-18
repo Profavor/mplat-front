@@ -77,7 +77,8 @@ import {
   NUpload,
   NUploadDragger,
   NUploadFileList,
-  NUploadTrigger
+  NUploadTrigger,
+  NPageHeader
 } from 'naive-ui'
 import store from '../store'
 import { App, inject } from 'vue'
@@ -166,7 +167,9 @@ function registerElement(app: App) {
       NUpload,
       NUploadDragger,
       NUploadFileList,
-      NUploadTrigger
+      NUploadTrigger,
+      NPageHeader,
+      NGradientText
     ],
   })
   app.use(navie)
