@@ -32,11 +32,6 @@ export function randomString(length: number) {
   return result
 }
 
-/**
- * 中划线字符驼峰
- * @param {*} str 要转换的字符串
- * @returns 返回值
- */
 export function toHump(str: string): string {
   if (!str) return str
   return str
@@ -254,7 +249,8 @@ export function findRouteByUrl(routes: Array<any>, path: string): RouteRecordRaw
   return null
 }
 
-export function messageGetter(message: any): string {
+export function messageGetter(e: any): string {
+    const message = e.data.message || e.data
     const lang = 'ko'    
     
     if(typeof message != 'undefined' && message != null) {
@@ -266,4 +262,193 @@ export function messageGetter(message: any): string {
     }
 
     return '';
+}
+
+export function messageSetter(e: any): boolean {
+  const message = e.data.message || e.data
+  const lang = 'ko' 
+  
+  const newValue = e.newValue
+  if(newValue.startsWith("{") && newValue.endsWith("}")){
+    let parse = JSON.parse(newValue)
+    if(typeof message != 'undefined' && message != null) {
+      message.messageId = parse.messageId
+      for(let index in message.messageLangs){
+        if(message.messageLangs[index].lang == lang){
+            message.messageLangs[index].message = parse.message
+        }
+      }
+      return true
+    }
+  }
+
+  return false;
+}
+
+export function messageGetterKo(e: any): string {
+  const message = e.data
+  const lang = 'ko'    
+  
+  if(typeof message != 'undefined' && message != null) {
+      for(let index in message.messageLangs){
+          if(message.messageLangs[index].lang == lang){
+              return message.messageLangs[index].message
+          }
+      }
+  }
+
+  return '';
+}
+
+export function messageGetterEn(e: any): string {
+  const message = e.data
+  const lang = 'en'    
+ 
+  if(typeof message != 'undefined' && message != null) {
+      for(let index in message.messageLangs){
+          if(message.messageLangs[index].lang == lang){
+              return message.messageLangs[index].message
+          }
+      }
+  }
+
+  return '';
+}
+
+export function messageSetterKo(e: any): boolean {
+  const message = e.data
+  const lang = 'ko' 
+  
+  if(typeof message != 'undefined' && message != null) {
+    for(let index in message.messageLangs){
+        if(message.messageLangs[index].lang == lang){
+            message.messageLangs[index].message = e.newValue
+            return true;
+        }
+    }
+  }
+
+  return false;
+}
+
+export function messageSetterEn(e: any): boolean {
+  const message = e.data
+  const lang = 'en'    
+ 
+  if(typeof message != 'undefined' && message != null) {
+    for(let index in message.messageLangs){
+        if(message.messageLangs[index].lang == lang){
+            message.messageLangs[index].message = e.newValue
+            return true;
+        }
+    }
+  }
+
+  return false;
+}
+
+export function unflatten(arr: any, id: any, parentId: any) {
+  let tree = [],
+      mappedArr: any = {},
+      arrElem,
+      mappedElem;
+
+  // First map the nodes of the array to an object -> create a hash table.
+  for(let i = 0, len = arr.length; i < len; i++) {
+    arrElem = arr[i];
+    mappedArr[eval('arrElem.'+id)] = arrElem;
+    mappedArr[eval('arrElem.'+id)]['children'] = [];
+  }
+
+
+  for (let id in mappedArr) {
+    if (mappedArr.hasOwnProperty(id)) {
+      mappedElem = mappedArr[id];
+      // If the element is not at the root level, add it to its parent array of children.
+      if (eval('mappedElem.'+ parentId)) {
+        mappedArr[mappedElem['parentId']]['children'].push(mappedElem);        
+      }
+      // If the element is at the root level, add it to first level elements array.
+      else {
+        tree.push(mappedElem);
+      }
+    }
+  }
+  return tree;
+}
+
+export function makeTreePath(arr2: any, id: any, parentId: any, children: any){
+    let arr = unflatten(arr2, id, parentId)
+
+    let data = []
+    let map = []
+    let queue = new Queue()
+
+    for(let idx in arr){
+        queue.push(arr[idx])
+    }
+
+    while(!queue.isEmpty()){
+        let d = queue.pop()
+
+        if(eval('d.'+children+'.length > 0')){
+            d.isLeaf = false
+        }else{
+            d.isLeaf = true
+        }
+
+        if(typeof map[eval('d.' +parentId)] == 'undefined'){
+           map[eval('d.' +parentId)] = []
+        }
+
+        map[eval('d.'+ id)] = JSON.parse(JSON.stringify(map[eval('d.' +parentId)]))
+        map[eval('d.'+ id)].push(eval('d.'+ id))
+
+        let loop = eval('d.'+ children)
+
+        for(let i in loop) {
+            queue.push(eval('d.'+ children + '[i]'))
+        }
+
+        d.treePath = map[eval('d.'+ id)]
+        data.push(d)
+    }
+    return data
+}
+
+class Queue {
+  _arr:any = []
+
+  constructor() {
+    this._arr = [];
+  }
+  push(item: any) {
+    this._arr.push(item);
+  }
+  pop() {
+    return this._arr.shift();
+  }
+  isEmpty() {
+      if(this._arr.length > 0){
+          return false
+      }else{
+          return true
+      }
+  }
+}
+
+class Stack {
+  _arr:any = []
+  constructor() {
+    this._arr = [];
+  }
+  push(item: any) {
+    this._arr.push(item);
+  }
+  pop() {
+    return this._arr.pop();
+  }
+  peek() {
+    return this._arr[this._arr.length - 1];
+  }
 }

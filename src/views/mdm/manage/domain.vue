@@ -16,9 +16,8 @@
         </template>
         <template #extra>
           <n-space>
-            <n-button @click="handleConfirm">Add</n-button>
-            <n-button>Edit</n-button>
-            <n-button>Delete</n-button>
+            <n-button @click="showModal = true">Add</n-button>
+            <n-button @click="deleteDomain">Delete</n-button>
           </n-space>
         </template>
       </n-page-header>  
@@ -28,57 +27,234 @@
 
         @cell-clicked="selectedItem"
         @grid-ready="gridReady"
+        @cell-value-changed="cellValueChanged"
 
+        rowSelection="single"
         :columnDefs="columnDefs"
-        :options="options"
     /> 
     </n-card>
+
+    <n-modal 
+      v-model:show="showModal"
+    >
+      <n-card
+        title="Domain Management"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        style="width: 600px;"
+      >
+        <template #header-extra>
+          <n-button tertiary circle type="error" @click="showModal = false">
+            <template #icon>
+              <n-icon><close-icon /></n-icon>
+            </template>
+          </n-button>
+        </template>
+        <n-space vertical>
+          <n-form
+          ref="formRef"
+          :model="model"
+          :rules="rules"
+          label-placement="left"
+          require-mark-placement="right-hanging"
+          label-width="auto"
+          :style="{
+            maxWidth: '640px'
+          }"
+        >
+          <n-form-item label="Domain ID" path="domainId">
+            <n-input v-model:value="model.domainId" placeholder="Input" />
+          </n-form-item>
+          <n-form-item label="Message" path="message">
+            <InputMessage v-model:value="model.message" @pickMessageId="setMessageId" />
+          </n-form-item>
+          
+          <n-form-item label="Enable" path="isEnable">
+            <n-select
+              v-model:value="model.isEnable"
+              placeholder="Select"
+              :options="selectOptions"
+            />
+          </n-form-item>
+        </n-form>
+        </n-space>
+        <template #footer>
+          <n-space justify="end">
+              <n-button round type="primary" @click="saveDomain">
+                  Save
+              </n-button>
+          </n-space>
+        </template>
+      </n-card>
+  </n-modal>
 </div>
 </template>
 
-<script lang="ts">  
+<script>  
+  import { get, post, del } from '@/api/http'
   import { defineComponent, ref, onMounted } from 'vue'
-  import { useMessage, useDialog } from 'naive-ui'
+  import { messageGetter, messageSetter } from '@/utils'
+  import { useMessage } from 'naive-ui'
+  import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
+  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
+  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
 
   export default defineComponent({
     name: 'MdmManageDomain',
+    components: {
+      messageEditor: MessageEditor, 
+      messageRenderer: MessageRenderer,
+      CloseIcon
+    },
     setup() {
+      const formRef = ref<null>(null)
+      const msg = useMessage()
       const columnDefs = ref([
         {headerName: 'ID', field: 'domainId'},
-        {headerName: 'NAME', field: 'message'},
-        {headerName: 'STATUS', field: 'status'}
+        {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
+          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, width: 260},
+        {headerName: 'USE', width:120, field: 'isEnable', cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true},
       ])
-
-      const dialog = useDialog()
-      const message = useMessage()
+      const model = ref({
+        domainId: null,
+        message: null,
+        messageId: "",
+        isEnable: null
+      })
 
       return {
+        msg,
         columnDefs,
-
-        handleConfirm () {
-        dialog.warning({
-          title: 'Confirm',
-          content: 'Are you sure?',
-          positiveText: 'Sure',
-          negativeText: 'Not Sure',
-          onPositiveClick: () => {
-            message.success('Sure')
+        showModal: ref(false),
+        formRef,
+        model,
+        rules: {
+          domainId: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
           },
-          onNegativeClick: () => {
-            message.error('Not Sure')
+          message: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },
+          isEnable: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },
+        },
+        selectOptions: [
+          {
+            label: "Y",
+            value: 'Y',
+          },
+          {
+            label: 'N',
+            value: 'N'
           }
-        })
-      },
-      } 
+        ],        
+      }
     },
+
+    data(){
+      return {
+        gridApi: null
+      }
+    },
+
     methods: {
-      gridReady(params: any){
-        params.api.setRowData([])
+      gridReady(params){
+        this.gridApi = params.api
+        this.loadDomain()
       },
 
-      selectedItem(data: Object){
-        console.log(data)
-      }
+      loadDomain(){
+         get({
+          url: '/api/domains',
+          data: () => {
+            return {
+              
+            }
+          },
+        })
+        .then((res) => {
+            this.gridApi.setRowData(res)
+        })
+        .catch(console.log)
+      },
+
+      selectedItem(data){
+        
+      },
+
+      setMessageId(value){
+        this.model.messageId = value
+      },
+
+      getFormValue(){
+        return {
+          domainId: this.model.domainId,
+          message:{
+            messageId: this.model.messageId
+          },
+          isEnable: this.model.isEnable
+        }
+      },
+
+      saveDomain(){
+        this.$refs.formRef.validate(
+          (errors) => {
+            if (!errors) {
+                  post({
+                    url: '/api/domains',
+                    data: this.getFormValue()
+                }).then(res=> {
+                    this.msg.success('Success!!')
+                    this.showModal = false
+                    this.loadDomain()
+                })
+            } else {
+                msg.error('Invalid')
+            }
+          }
+        )
+      },
+
+      deleteDomain(){
+        let selectedData = this.gridApi.getSelectedRows()
+        if(selectedData.length > 0) {         
+
+          del({
+            url: '/api/domains/'+selectedData[0].domainId
+          }).then(res=> {
+             this.gridApi.applyTransaction({ remove: selectedData });
+          })
+        }
+      },
+
+      getDomainValue(data) {
+            return {
+                domainId: data.domainId,
+                isEnable: data.isEnable,
+                message: {
+                  messageId: data.message.messageId
+                }
+            }
+        },
+
+      cellValueChanged(params) {
+             post({
+                url: '/api/domains',
+                data: this.getDomainValue(params.data)
+            }).then(res=> {
+                this.msg.success('Success!!')
+                this.showMessageModal = false
+            })
+        }
     }
   })
 </script>

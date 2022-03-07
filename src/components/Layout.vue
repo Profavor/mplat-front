@@ -2,7 +2,7 @@
   <n-config-provider
     :theme-overrides="state.themeOverrides"
     :theme="state.theme === 'dark' ? darkTheme : null"
-    :locale="zhCN"
+    :locale="enUS"
     style="height: 100%"
   >
     <n-global-style />
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-  import { darkTheme, zhCN } from 'naive-ui'
+  import { darkTheme, enUS } from 'naive-ui'
   import { computed, defineComponent, onBeforeUnmount, onMounted } from 'vue'
   import { DeviceType } from '../types/store'
   import { useLayoutStore } from './index'
@@ -78,7 +78,7 @@
       return {
         state: store?.state,
         darkTheme,
-        zhCN,
+        enUS,
         isShowHeader,
         closeMenu,
       }
