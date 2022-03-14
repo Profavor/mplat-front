@@ -1,7 +1,7 @@
 <template>
     <ag-grid-vue 
         :columnDefs="columnDefs"
-        :options="options"
+        :gridOptions="options"
     > 
     </ag-grid-vue>
 </template>
@@ -10,6 +10,7 @@
 import "ag-grid-enterprise/dist/styles/ag-grid.css";
 import "ag-grid-enterprise/dist/styles/ag-theme-alpine.css";
 import { AgGridVue } from "ag-grid-vue3";
+import {LicenseManager} from 'ag-grid-enterprise'
 
 import { defineComponent, ref } from 'vue'
 
@@ -31,12 +32,19 @@ export default defineComponent({
         options: {
             type: Object,
             default: function(){
-                return {}
+                return {
+                    sideBar: false,
+                    defaultColDef: {
+                        filter: true,
+                        sortable: true
+                    }
+                }
             }
         }
     },
 
-    setup(){
+    setup(props){
+        LicenseManager.setLicenseKey(import.meta.env.VITE_KEY)
         return {
         }
     },

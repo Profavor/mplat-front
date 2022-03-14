@@ -42,6 +42,10 @@ const originState = {
     nickName: 'Nick Name',
     avatar: 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg',
   },
+  domain: {
+    domainId: '',
+    domainList: []
+  },
   actionItem: {
     showSearch: Setting.actionBar.isShowSearch,
     showMessage: Setting.actionBar.isShowMessage,
@@ -134,6 +138,9 @@ const store: StoreType = {
     this.state.userInfo.nickName = userInfo ? userInfo.nickName || '' : ''
     this.state.userInfo.avatar = userInfo ? userInfo.avatar || '' : ''
   },
+  setDomain(domain: {domainId: string}) {
+    this.state.domain.domainId = domain ? domain.domainId || '' : ''
+  },
   reset() {
     this.state = reactive<StateType>({
       isCollapse: false,
@@ -159,6 +166,10 @@ const store: StoreType = {
       userInfo: {
         nickName: 'Nick Name',
         avatar: 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg',
+      },
+      domain: {
+        domainId: '',
+        domainList: []
       },
       actionItem: {
         showSearch: Setting.actionBar.isShowSearch,

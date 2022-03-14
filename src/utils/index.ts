@@ -264,6 +264,80 @@ export function messageGetter(e: any): string {
     return '';
 }
 
+export function mgroupGetter(params: any) {
+  const lang = 'ko'
+  let data = params.node.data.mgroup
+
+  if(data == null){
+    return '';
+  }
+
+  if(typeof data.message != 'undefined' && data.message != null) {
+    for(let index in data.message.messageLangs){
+      if(data.message.messageLangs[index].lang == lang){
+        return data.message.messageLangs[index].message
+      }
+    }
+  }else if(typeof data.messageLangs != 'undefined') {
+    for(let index in data.messageLangs){
+      if(data.messageLangs[index].lang == lang){
+        return data.messageLangs[index].message
+      }
+    }
+  }
+
+  return '';
+}
+
+
+export function msectionGetter(params: any) {
+  const lang = 'ko'
+  let data = params.node.data.msection
+
+  if(data == null){
+    return '';
+  }
+  if(typeof data.message != 'undefined' && data.message != null) {
+    for(let index in data.message.messageLangs){
+      if(data.message.messageLangs[index].lang == lang){
+        return '['+data.sectionId+'] '+data.message.messageLangs[index].message
+      }
+    }
+  }else if(typeof data.messageLangs != 'undefined') {
+    for(let index in data.messageLangs){
+      if(data.messageLangs[index].lang == lang){
+        return '['+data.sectionId+'] '+ data.messageLangs[index].message
+      }
+    }
+  }
+  return '';
+}
+
+export function msectionSetter(params: any): boolean {
+  let data = params.node.data.msection
+  
+  const lang = 'ko' 
+  
+  const newValue = params.newValue
+  if(newValue.startsWith("{") && newValue.endsWith("}")){
+    let parse = JSON.parse(newValue)
+    if(typeof data != 'undefined' && data != null) {
+      data.sectionId = parse.entityId
+      let message = data.message
+      console.log(message)
+      for(let index in message.messageLangs){
+        if(message.messageLangs[index].lang == lang){
+            message.messageLangs[index].message = parse.message
+        }
+      }
+      return true
+    }
+  }
+
+  return false;
+}
+
+
 export function messageSetter(e: any): boolean {
   const message = e.data.message || e.data
   const lang = 'ko' 
@@ -345,6 +419,17 @@ export function messageSetterEn(e: any): boolean {
   }
 
   return false;
+}
+
+export function getMessageName(message: any, lang: string){
+  if(message != null){
+    for(let index in message.messageLangs) {
+      if(message.messageLangs[index].lang === lang) {
+        return message.messageLangs[index].message
+      }
+    }
+  }
+  return ''
 }
 
 export function unflatten(arr: any, id: any, parentId: any) {

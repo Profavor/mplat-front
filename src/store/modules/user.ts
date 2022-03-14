@@ -23,6 +23,7 @@ export const userModule: Module<UserState, RootState> = {
     userName: userInfo.userName || '',
     nickName: userInfo.nickName || '',
     avatar: userInfo.avatar || defaultAvatar,
+    lang: userInfo.lang || 'ko'
   },
   getters: {
     userId(state) {
@@ -62,6 +63,8 @@ export const userModule: Module<UserState, RootState> = {
       state.userName = userInfo.userName
       state.nickName = userInfo.nickName
       state.avatar = userInfo.avatar || defaultAvatar
+      state.lang = userInfo.lang || 'ko'
+      localStorage.setItem('lang', state.lang)
       Cookies.set('admin-work-token', userInfo.token)
       localStorage.setItem('p-user-info', JSON.stringify(userInfo))
       layoutStore.setUserInfo({
@@ -77,6 +80,7 @@ export const userModule: Module<UserState, RootState> = {
       state.userName = ''
       state.nickName = ''
       state.token = ''
+      state.lang = 'ko'
       Cookies.remove('admin-work-token')
       localStorage.clear()
       layoutStore.reset()

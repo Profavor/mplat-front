@@ -67,6 +67,7 @@ export interface StateType {
   visitedView: Array<RouteRecordRawWithHidden>
   cachedView: Array<string>
   userInfo: { nickName: string; avatar: string }
+  domain: { domainId: string; domainList: Array<any> }
   actionItem: {
     showSearch: boolean
     showMessage: boolean
@@ -92,5 +93,6 @@ export interface StoreType extends CacheView, VisitedView {
   initPermissionRoute: (routes: Array<RouteRecordRaw>) => void
   isEmptyPermissionRoute: () => boolean
   setUserInfo: (userInfo: { nickName: string; avatar: string }) => void
+  setDomain: (domain: { domainId: string }) => void
   reset: () => void
 }

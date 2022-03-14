@@ -1,79 +1,110 @@
 <template>
-    <div>
+     <n-input v-model:value="value" placeholder="Click search button." readonly v-if="disabled" />
+     <n-input-group v-if="!disabled">    
+        <n-input v-model:value="value" placeholder="Click search button." readonly />
+        <n-button type="primary" ghost @click="showModal = true"> 
+            Search            
+        </n-button>
+         <n-modal 
+            v-model:show="showModal"
+            >
+                <n-card
+                title="Ref Management"
+                :bordered="false"
+                size="huge"
+                role="dialog"
+                aria-modal="true"
+                style="max-width: 1000px;"
+            >
+                <template #header-extra>
+                <n-button tertiary circle type="error" @click="searchText = ''; showModal = false">
+                    <template #icon>
+                        <n-space >
+                            <n-icon><close-icon /></n-icon>   
+                        </n-space>
+                    </template>
+                </n-button>
+                </template>
 
-    </div>    
+                <n-space vertical>
+                    <n-input size="small" round placeholder="Small" v-model:value="searchText"  @change="searchHandler" clearable />
+                    <InputAgGrid style="height: 400px; padding-top: 10px;" class="ag-theme-alpine" 
+                        :columnDefs="columnDefs" 
+                        :options="gridOptions"
+                        @grid-ready="gridReady"
+                        @cell-clicked="pickMessage" 
+                        ref="agGrid"
+                        rowSelection="single"
+                        pagination
+                    />
+                </n-space>        
+                <template #footer>
+                    <n-space justify="end">        
+                        <n-button round type="primary" @click="searchText = ''; showModal = false">
+                            Select
+                        </n-button>
+                    </n-space>
+                </template>
+            </n-card>
+
+            </n-modal>
+    </n-input-group>   
 </template>
 
 <script>
 import { get } from '@/api/http'
-import { makeTreePath } from '@/utils'
+import { makeTreePath, messageGetter } from '@/utils'
+import { defineComponent, ref, onMounted, computed } from 'vue'
+import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
+
   export default {
     name: 'InputRef',
 
-    created: function(){
-      this.inputValue = this.value
-      if(this.entityKey != null){
-        this.initValue(this.entityKey)
+    setup(props, {emit}){
+      const message = computed({ 
+          get: () => props.value, 
+          set: (value) => emit('update:value', value) 
+      }) 
+
+      const showModal = ref(false)
+      return {
+        showModal,
+        message
       }
     },
     components: {
+      CloseIcon
     },
     props: {
-        showCode: {
-          type: Boolean,
-          default: true
-        },
-        entityId: {
-            type: String,
-            default: null
-        },
-        entity: {
-            type: String,
-            default: ''
-        },
-        entityKey: {
+        url: {
           type: String,
-          default: null
+          default: ""
         },
+
         value: {
-            type: String,
-            default: null
+          type: String,
+          default: ""
         },
-        label: {
-            type: String,
-            default: 'Entity search'
+
+        entityId: {
+          type: String,
+          default: ""
         },
-        icon: {
-            type: String,
-            default: ''
+
+        columnDefs: {
+          type: Array,
+          default: function() {
+            return [
+            ]
+          }
         },
-        hint: {
-            type: String,
-            default: ''
-        },
-        disabled: {
-            type: Boolean,
-            default: false
-        },
-        readOnly: {
-            type: Boolean,
-            default: false
-        },
-        title: {
-            type: String,
-            default: 'Entity Search'
-        },
+             
         gridOptions: {
             type: Object,
             default: function() {
               return {
               }
             }
-        },
-
-        isDomain: {
-          type: Boolean,
-          default: false
         },
 
         treeData: {
@@ -87,122 +118,50 @@ import { makeTreePath } from '@/utils'
             }
           }
         },
+
+        disabled: {
+          type: Boolean,
+          default: false
+        }
     },
     data () {
       return {
         gridApi: null,
-        entityValue: '',
-        dialog: false,
-        inputValue: '',
-        search: '',
-        isEditing: false,
-        rowSelection: 'single',
-        valid: false,
-        selected: [],
-        messageDialog: false
+        searchText: ""
       }
     },
 
-    mounted(){
-      this.$emit('ready', {})
-    },
     methods: {
-        saveMessage(flag){          
-          this.messageDialog = false
-          this.getData()
-          
-        },
-        onGridReady(params) {
+        gridReady(params) {
           this.gridApi = params.api
           this.getData()
         },
 
         getData() {
-          let url = '/api/' + this.entity
-          get(url)
+          get({
+            url: this.url
+            })
             .then(res => {
-              if(this.treeData.enable){         
-                  makeTreePath(res.data, this.treeData.id, this.treeData.parentId, this.treeData.children)
-                  this.gridApi.setRowData(res.data)
+              if(this.treeData.enable){ 
+                  let data = makeTreePath(res, this.treeData.id, this.treeData.parentId, this.treeData.children)
+                  this.gridApi.setRowData(data)
                   this.gridApi.expandAll()
               }else{
-                this.gridApi.setRowData(res.data)
+                this.gridApi.setRowData(res)
               }
             }).catch(err => console.log(err))
+        },        
+
+        pickMessage(params) {
+            let entityValue = eval('params.data.'+ this.entityId)
+            this.message = messageGetter(params)
+            this.$emit('pickEntityId', entityValue)            
         },
 
-        enterHandler(){
-            this.dialog = true
-            this.search = this.inputValue
-
-            this.searchHandler()
-
+        searchHandler(){
+            this.gridApi.setQuickFilter(this.searchText);
+            this.gridApi.deselectAll();
         },
-
-        toggleEditable(){
-            if(this.isEditing){
-                this.saveHandler();
-            }else{
-                this.isEditing = true
-            }
-        },
-
-        reset(){
-          this.inputValue = ''
-          this.entityValue = ''
-        },
-
-        getValueById(){
-            //require entityId
-            return this.entityValue
-        },
-
-        pickValue(event){
-           this.inputValue = this.showCode ? messageGetterWithId(event, this.entityId) : messageGetter(event)
-           this.selected = event.data
-           this.dialog = false
-           if(this.entityId){
-             this.entityValue = eval('event.data.'+ this.entityId)
-           }
-           this.$emit('getValue', this.selected)
-        },
-
-        invalid(){
-            this.valid = false
-            this.success = false
-            this.successMessages = ''
-            this.selected = []
-        },
-
-        searchHandler(e) {
-          if(!!this.$refs.entityGrid){
-            this.$refs.entityGrid.gridApi.setQuickFilter(this.search);
-          }
-        },
-
-        emptyCheckHandler() {
-          if(this.inputValue == null || this.inputValue == ''){
-             this.$emit('getValue', [])
-          }
-        },
-
-        initValue(key) {
-          this.$axios.get(process.env.SERVER_URL + '/api/' + this.entity + '/' + key).then(res => {
-            if(this.entity == 'messages'){
-               this.inputValue = this.isCode ?'['+eval('res.data.'+this.entityId)+'] ' + getMessageName(res.data, this.lang) : getMessageName(res.data, this.lang)
-            }else{
-              if(eval('res.data.'+this.entityId)){
-                this.inputValue = this.isCode ?  '['+eval('res.data.'+this.entityId)+'] ' + getMessageName(res.data.message, this.lang) : getMessageName(res.data.message, this.lang)
-              }else{
-                this.inputValue = getMessageName(res.data.message, this.lang)
-              }
-            }
-            if(this.entityId != null){
-              this.entityValue = eval('res.data.'+this.entityId)
-            }
-            this.$emit('getValue', res.data)
-        })
-      }
     }
   }
 </script>

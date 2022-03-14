@@ -2,6 +2,7 @@ import { RootState, ParentState } from './types'
 import { createStore, useStore as baseUserStore, Store } from 'vuex'
 import { appModule } from './modules/app'
 import { userModule } from './modules/user'
+import { domainModule } from './modules/domain'
 import { InjectionKey } from 'vue'
 
 export default createStore<RootState>({
@@ -11,6 +12,7 @@ export default createStore<RootState>({
   modules: {
     user: userModule,
     app: appModule,
+    domain: domainModule
   },
 })
 
