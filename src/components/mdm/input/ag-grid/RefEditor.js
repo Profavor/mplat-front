@@ -4,7 +4,7 @@ import {nextTick} from 'vue';
 export default {
     template: `
       <n-message-provider>
-        <InputRef v-model:value="message" placeholder="Input" :columnDefs="sectionColDefs" url="/api/sections" entityId="sectionId" @pickEntityId="setEntityId" />
+        <InputRef v-model:value="message" placeholder="Input" :columnDefs="entityColDef" :url="url" :entityId="entityId" @pickEntityId="setEntityId" />
       </n-message-provider>
     `,
     components: {
@@ -15,7 +15,7 @@ export default {
             entityId: "",
             message: null,
             value: "",
-            sectionColDefs: null,
+            entityColDef: null,
             url: null,
         };
     },
@@ -25,7 +25,7 @@ export default {
         },
 
         isPopup() {
-            return true;
+            return false;
         },
 
         setEntityId(entityId){
@@ -35,9 +35,9 @@ export default {
 
     },
     created() {
-        this.entityId = this.params.colDef.custom.entityId
-        this.sectionColDefs = this.params.colDef.custom.entityColDef
-        this.url = this.params.colDef.custom.url
+        this.entityId = this.params.colDef.toColDef.entityId
+        this.entityColDef = this.params.colDef.toColDef.entityColDef
+        this.url = this.params.colDef.toColDef.url
         if(this.params.value.startsWith("{") && this.params.value.endsWith("}")){
             let parse = JSON.parse(this.params.value)
             this.messageId = parse.messageId

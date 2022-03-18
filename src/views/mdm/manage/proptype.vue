@@ -1,6 +1,6 @@
 <template>
 <div class="main-container">
-    <n-card  :content-style="{ padding: '10px' }" :header-style="{ padding: '10px' }">
+    <n-card style="height:calc(80vh - 15px);" :content-style="{ padding: '10px' }" :header-style="{ padding: '10px' }">
       <n-page-header subtitle="A podcast to improve designs">
         <template #title>
           <n-gradient-text
@@ -22,7 +22,7 @@
         </template>
       </n-page-header>  
       
-      <InputAgGrid style="height: 500px; padding-top: 10px;"
+      <InputAgGrid style="height: 100%; padding-top: 10px;"
         class="ag-theme-alpine"
 
         @cell-clicked="selectedItem"

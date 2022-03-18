@@ -1,12 +1,12 @@
 <template>
 <div class="main-container">
-    <n-card style="height:calc(80vh - 15px);" :content-style="{ padding: '0px' }" :header-style="{ padding: '0px' }">
+    <n-card style="height:calc(80vh - 15px);" :content-style="{ padding: '10px' }" :header-style="{ padding: '10px' }">
       <n-page-header subtitle="A podcast to improve designs">
         <template #title>
           <n-gradient-text
             gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)"
           >
-            Domain Manager
+            Area Manager
           </n-gradient-text>
         </template>
         <template #avatar>
@@ -17,7 +17,7 @@
         <template #extra>
           <n-space>
             <n-button @click="showModal = true">Add</n-button>
-            <n-button @click="deleteDomain">Delete</n-button>
+            <n-button @click="remove">Delete</n-button>
           </n-space>
         </template>
       </n-page-header>  
@@ -38,7 +38,7 @@
       v-model:show="showModal"
     >
       <n-card
-        title="Domain Management"
+        title="Area Management"
         :bordered="false"
         size="huge"
         role="dialog"
@@ -64,25 +64,21 @@
             maxWidth: '640px'
           }"
         >
-          <n-form-item label="Domain ID" path="domainId">
-            <n-input v-model:value="model.domainId" placeholder="Input" />
+          <n-form-item label="Type" path="type">
+            <n-input v-model:value="model.areaId" placeholder="Input" />
           </n-form-item>
           <n-form-item label="Message" path="message">
             <InputMessage v-model:value="model.message" @pickMessageId="setMessageId" />
           </n-form-item>
-          
-          <n-form-item label="Enable" path="isEnable">
-            <n-select
-              v-model:value="model.isEnable"
-              placeholder="Select"
-              :options="selectOptions"
-            />
+          <n-form-item label="Description" path="description">
+            <n-input v-model:value="model.status" placeholder="Input" />
           </n-form-item>
+
         </n-form>
         </n-space>
         <template #footer>
           <n-space justify="end">
-              <n-button round type="primary" @click="saveDomain">
+              <n-button round type="primary" @click="save">
                   Save
               </n-button>
           </n-space>
@@ -100,28 +96,36 @@
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
   import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
   import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
+  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.js'
+  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.js'
+  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.js'
 
   export default defineComponent({
-    name: 'MdmManageDomain',
+    name: 'MdmManageProptype',
     components: {
       messageEditor: MessageEditor, 
       messageRenderer: MessageRenderer,
+      numberEditor: NumberEditor,
+      refEditor: RefEditor,
+      refRenderer: RefRenderer,
       CloseIcon
     },
     setup() {
       const formRef = ref<null>(null)
-      const msg = useMessage()
-      const columnDefs = ref([
-        {headerName: 'ID', field: 'domainId'},
+      const msg = useMessage()     
+
+      const columnDefs = ref([        
+        {headerName: 'ID', field: 'areaId'},        
         {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
-          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, width: 260},
-        {headerName: 'USE', width:120, field: 'isEnable', cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true},
+          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true},       
+        {headerName: 'Status', field: 'status', editable: true, flex: 1},     
       ])
+
       const model = ref({
-        domainId: null,
+        areaId: null,
         message: null,
         messageId: "",
-        isEnable: null
+        status: ""
       })
 
       return {
@@ -131,7 +135,7 @@
         formRef,
         model,
         rules: {
-          domainId: {
+          areaId: {
             required: true,
             trigger: ['blur', 'input'],
             message: 'Required'
@@ -140,23 +144,13 @@
             required: true,
             trigger: ['blur', 'input'],
             message: 'Required'
-          },
-          isEnable: {
-            required: true,
+          },     
+          status: {
+            required: true, 
             trigger: ['blur', 'input'],
             message: 'Required'
           },
-        },
-        selectOptions: [
-          {
-            label: "Y",
-            value: 'Y',
-          },
-          {
-            label: 'N',
-            value: 'N'
-          }
-        ],        
+        },      
       }
     },
 
@@ -169,12 +163,12 @@
     methods: {
       gridReady(params){
         this.gridApi = params.api
-        this.loadDomain()
+        this.load()
       },
 
-      loadDomain(){
+      load(){
          get({
-          url: '/api/domains',
+          url: '/api/areas',
           data: () => {
             return {
               
@@ -197,59 +191,58 @@
 
       getFormValue(){
         return {
-          domainId: this.model.domainId,
+          areaId: this.model.areaId,         
           message:{
             messageId: this.model.messageId
           },
-          isEnable: this.model.isEnable
+          status: this.model.status 
         }
       },
 
-      saveDomain(){
+      save(){
         this.$refs.formRef.validate(
           (errors) => {
             if (!errors) {
                   post({
-                    url: '/api/domains',
+                    url: '/api/areas',
                     data: this.getFormValue()
                 }).then(res=> {
                     this.msg.success('Success!!')
                     this.showModal = false
-                    this.loadDomain()
+                    this.load()
                 })
             } else {
-                msg.error('Invalid')
+                this.msg.error('Invalid')
             }
           }
         )
       },
 
-      deleteDomain(){
+      remove(){
         let selectedData = this.gridApi.getSelectedRows()
-        if(selectedData.length > 0) {         
-
+        if(selectedData.length > 0) {
           del({
-            url: '/api/domains/'+selectedData[0].domainId
+            url: '/api/areas/'+selectedData[0].areaId
           }).then(res=> {
              this.gridApi.applyTransaction({ remove: selectedData });
           })
         }
       },
 
-      getDomainValue(data) {
+      getValue(data) {
             return {
-                domainId: data.domainId,
-                isEnable: data.isEnable,
+                areaId: data.areaId,
                 message: {
                   messageId: data.message.messageId
-                }
+                },
+                status: data.status
             }
         },
 
       cellValueChanged(params) {
              post({
-                url: '/api/domains',
-                data: this.getDomainValue(params.data)
+                url: '/api/areas',
+                data: this.getValue(params.data)
             }).then(res=> {
                 this.msg.success('Success!!')
                 this.showMessageModal = false

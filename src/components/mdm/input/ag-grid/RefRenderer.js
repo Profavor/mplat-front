@@ -9,7 +9,6 @@ export default {
     methods: {
     },
     created() {
-        console.log(this.params)
         if(this.params.value.startsWith("{") && this.params.value.endsWith("}")){
             let parse = JSON.parse(this.params.value)
             this.messageId = parse.messageId

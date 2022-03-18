@@ -34,8 +34,7 @@
                         @grid-ready="gridReady"
                         @cell-clicked="pickMessage" 
                         ref="agGrid"
-                        rowSelection="single"
-                        pagination
+                        rowSelection="single"                        
                     />
                 </n-space>        
                 <template #footer>

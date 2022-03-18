@@ -264,35 +264,9 @@ export function messageGetter(e: any): string {
     return '';
 }
 
-export function mgroupGetter(params: any) {
+export function dataGetter(params: any) {
   const lang = 'ko'
-  let data = params.node.data.mgroup
-
-  if(data == null){
-    return '';
-  }
-
-  if(typeof data.message != 'undefined' && data.message != null) {
-    for(let index in data.message.messageLangs){
-      if(data.message.messageLangs[index].lang == lang){
-        return data.message.messageLangs[index].message
-      }
-    }
-  }else if(typeof data.messageLangs != 'undefined') {
-    for(let index in data.messageLangs){
-      if(data.messageLangs[index].lang == lang){
-        return data.messageLangs[index].message
-      }
-    }
-  }
-
-  return '';
-}
-
-
-export function msectionGetter(params: any) {
-  const lang = 'ko'
-  let data = params.node.data.msection
+  let data = eval('params.node.data.'+params.colDef.toColDef.field)
 
   if(data == null){
     return '';
@@ -300,21 +274,21 @@ export function msectionGetter(params: any) {
   if(typeof data.message != 'undefined' && data.message != null) {
     for(let index in data.message.messageLangs){
       if(data.message.messageLangs[index].lang == lang){
-        return '['+data.sectionId+'] '+data.message.messageLangs[index].message
+        return '['+eval('data.'+ params.colDef.toColDef.entityId)+'] '+data.message.messageLangs[index].message
       }
     }
   }else if(typeof data.messageLangs != 'undefined') {
     for(let index in data.messageLangs){
       if(data.messageLangs[index].lang == lang){
-        return '['+data.sectionId+'] '+ data.messageLangs[index].message
+        return '['+eval('data.'+ params.colDef.toColDef.entityId)+'] '+ data.messageLangs[index].message
       }
     }
   }
   return '';
 }
 
-export function msectionSetter(params: any): boolean {
-  let data = params.node.data.msection
+export function dataSetter(params: any): boolean {
+  let data = eval('params.node.data.'+params.colDef.toColDef.field)
   
   const lang = 'ko' 
   
@@ -336,7 +310,6 @@ export function msectionSetter(params: any): boolean {
 
   return false;
 }
-
 
 export function messageSetter(e: any): boolean {
   const message = e.data.message || e.data

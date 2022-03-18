@@ -44,6 +44,7 @@ const originState = {
   },
   domain: {
     domainId: '',
+    domainName: '',
     domainList: []
   },
   actionItem: {
@@ -169,6 +170,7 @@ const store: StoreType = {
       },
       domain: {
         domainId: '',
+        domainName: '',
         domainList: []
       },
       actionItem: {

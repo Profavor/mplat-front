@@ -17,6 +17,12 @@ export const adminRoutes = [
       },
       {
         parentPath: '/mdm',
+        menuUrl: '/mdm/data',
+        menuName: 'Data',
+        cacheable: true,
+      },
+      {
+        parentPath: '/mdm',
         menuUrl: '/mdm/manage',
         menuName: 'Manage',
         icon: 'setting',
@@ -57,6 +63,12 @@ export const adminRoutes = [
             parentPath: '/mdm/manage',
             menuUrl: '/mdm/manage/proptype',
             menuName: 'Prop-type',
+            cacheable: true,
+          },
+          {
+            parentPath: '/mdm/manage',
+            menuUrl: '/mdm/manage/area',
+            menuName: 'Area',
             badge: 'new',
             cacheable: true,
           },

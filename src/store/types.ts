@@ -1,5 +1,8 @@
 export interface RootState {
   root: string
+  user: any
+  app: any
+  domain: any
 }
 
 export interface AppState {
@@ -27,5 +30,6 @@ export interface ParentState {
 
 export interface DomainState {
   domainId: string
+  domainName: string
   domainList: Array<any>
 }

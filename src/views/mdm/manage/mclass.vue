@@ -1,6 +1,6 @@
 <template>
-<div class="main-container">
-    <n-card  :content-style="{ padding: '10px' }" :header-style="{ padding: '10px' }">
+<div class="main-container" >
+    <n-card  style="height:calc(80vh - 15px);" :content-style="{ padding: '10px' }" :header-style="{ padding: '10px' }">
       <n-page-header subtitle="A podcast to improve designs">
         <template #title>
           <n-gradient-text
@@ -14,14 +14,15 @@
             src="https://cdnimg103.lizhi.fm/user/2017/02/04/2583325032200238082_160x160.jpg"
           />
         </template>
-        <template #extra>
+        <template #extra>          
           <n-space>
+            <n-button @click="showClassPropModal = true" :disabled="classId == null">Set Props</n-button>
             <n-button @click="showModal = true">Add</n-button>
             <n-button @click="deleteData">Delete</n-button>
           </n-space>
         </template>
       </n-page-header>  
-      <InputAgGrid style="height: 500px; padding-top: 10px;"
+      <InputAgGrid style="padding-top: 10px; height: 100%;"
         class="ag-theme-alpine"
 
         @cell-clicked="selectedItem"
@@ -29,7 +30,7 @@
         @cell-value-changed="cellValueChanged"
 
         rowSelection="single"
-        :columnDefs="classGridOption.columnDefs" :options="classGridOption.options"
+        :columnDefs="columnDefs" :options="classGridOption.options"
     /> 
     </n-card>
     <n-modal 
@@ -73,7 +74,10 @@
           </n-form-item>
           <n-form-item label="Parent Class" path="parentId">
             <InputRef v-model:value="model.parentMessage" placeholder="Input" :columnDefs="classGridOption.columnDefs" :gridOptions="classGridOption.options" :url="'/api/classes/'+domainId" entityId="classId" :treeData="classTreeData"  @pickEntityId="setParentId"/>
-          </n-form-item>          
+          </n-form-item>
+          <n-form-item label="Display Seq" path="dispSeq">
+            <n-input-number v-model:value="model.dispSeq" clearable />
+          </n-form-item>    
           <n-form-item label="Enable" path="isEnable">
             <n-select
               v-model:value="model.isEnable"
@@ -92,17 +96,133 @@
         </template>
       </n-card>
   </n-modal>
+  <n-modal 
+      v-model:show="showClassPropModal"
+    >
+      <n-card
+        title="Settings Prop"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        style="width: 1000px;"
+      >
+        <template #header-extra>
+          <n-button tertiary circle type="error" @click="showClassPropModal = false">
+            <template #icon>
+              <n-icon><close-icon /></n-icon>
+            </template>
+          </n-button>
+        </template>
+        <n-space vertical>
+          <InputAgGrid style="height: 500px; padding-top: 10px;"
+              class="ag-theme-alpine"
+
+              @grid-ready="gridReady2"
+              @cell-value-changed="classPropChanged"
+
+              rowSelection="single"
+              :columnDefs="classPropColumnDefs"
+          /> 
+        </n-space>
+        <template #footer>
+          <n-space justify="end">
+              <n-button round type="primary" @click="classPropInit">
+                  Add
+              </n-button>
+              <n-button round type="primary" @click="deleteClassProp">
+                  Delete
+              </n-button>
+          </n-space>
+        </template>
+      </n-card>
+  </n-modal>
+  <n-modal 
+      v-model:show="showClassPropInputModal"
+    >
+      <n-card
+        title="Class-Prop Add"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        style="width: 600px;"
+      >
+        <template #header-extra>
+          <n-button tertiary circle type="error" @click="showClassPropInputModal = false">
+            <template #icon>
+              <n-icon><close-icon /></n-icon>
+            </template>
+          </n-button>
+        </template>
+        <n-space vertical>
+          <n-form
+          ref="formRef2"
+          :model="classPropModel"
+          :rules="classPropRules"
+          label-placement="left"
+          require-mark-placement="right-hanging"
+          label-width="auto"
+          :style="{
+            maxWidth: '640px'
+          }"
+        >
+          <n-form-item label="Domain" path="domainId">
+            <InputRef v-model:value="classPropModel.domainMessage" placeholder="Input" url="/api/domains" entityId="domainId" :disabled="true" />
+          </n-form-item>
+          <n-form-item label="Class" path="classId">
+            <InputRef v-model:value="classPropModel.classMessage" placeholder="Input" url="/api/classes" entityId="classId" :disabled="true" />
+          </n-form-item>
+          <n-form-item label="Prop" path="propId">
+            <InputRef v-model:value="classPropModel.propMessage" placeholder="Input"  :columnDefs="propColumnDefs" :url="'/api/props'" entityId="propId"  @pickEntityId="setPropId" />
+          </n-form-item> 
+          <n-form-item label="Display Seq" path="dispSeq">
+            <n-input-number v-model:value="classPropModel.dispSeq" clearable />
+          </n-form-item>
+          <n-form-item label="Show" path="isShow">
+            <n-select
+              v-model:value="classPropModel.isShow"
+              placeholder="Select"
+              :options="selectOptions"
+            />
+          </n-form-item>
+          <n-form-item label="ReadOnly" path="isReadOnly">
+            <n-select
+              v-model:value="classPropModel.isReadOnly"
+              placeholder="Select"
+              :options="selectOptions"
+            />
+          </n-form-item>
+          <n-form-item label="Disable" path="isDisabled">
+            <n-select
+              v-model:value="classPropModel.isDisabled"
+              placeholder="Select"
+              :options="selectOptions"
+            />
+          </n-form-item>
+        </n-form>
+        </n-space>
+        <template #footer>
+          <n-space justify="end">
+              <n-button round type="primary" @click="saveClassProp">
+                  Save
+              </n-button>
+          </n-space>
+        </template>
+      </n-card>
+  </n-modal>
 </div>
 </template>
 
 <script>  
   import { get, post, del } from '@/api/http'
   import { defineComponent, ref, onMounted } from 'vue'
-  import { messageGetter, makeTreePath } from '@/utils'
+  import { messageGetter, messageSetter, makeTreePath, dataGetter } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
   import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
   import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
+  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.js'
   import { useStore } from '@/store/store'
 
   export default defineComponent({
@@ -110,6 +230,7 @@
     components: {
       messageEditor: MessageEditor, 
       messageRenderer: MessageRenderer,
+      numberEditor: NumberEditor,
       CloseIcon
     },
     setup() {
@@ -124,8 +245,54 @@
         message: null,
         messageId: "",
         parentId: "",
+        dispSeq: 0,
         isEnable: null
       })
+
+      const classPropModel = ref({
+        domainMessage: null,
+        classMessage: null,
+        propMessage: null,
+        propId: null,
+        dispSeq: 0,
+        isReadOnly: 'N',
+        isDisabled: 'N',
+        isShow: 'Y'
+      })
+
+      const columnDefs = ref([ 
+        {headerName: 'ID', field: 'classId'},        
+        {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
+          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, flex: 1},    
+        {headerName: 'Display Seq', field: 'dispSeq', editable: true, type: 'numericColumn', cellEditor: 'numberEditor', sortable: true, sort: 'asc'},   
+        {headerName: 'USE', width:120, field: 'isEnable', cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true},
+      ])
+
+      const propColumnDefs = ref([
+        {headerName: 'Group', valueGetter: dataGetter, toColDef: { field: 'mgroup', entityId: 'groupId'},
+          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: false},
+        {headerName: 'ID', field: 'propId'},
+        {headerName: 'NAME', valueGetter: messageGetter,
+          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: false, width: 260},
+        {headerName: 'Area', valueGetter: dataGetter, toColDef: { field: 'area', entityId: 'areaId'},
+         cellEditor: "refEditor", cellRenderer: "refRenderer", editable: false},
+        {headerName: 'Type', valueGetter: dataGetter, toColDef: { field: 'propType', entityId: 'type'},
+         cellEditor: "refEditor", cellRenderer: "refRenderer", editable: false},
+        {headerName: 'Mode', field: 'propMode', editable: false},
+        {headerName: 'DB Type', field: 'dbType', editable: false},
+        {headerName: 'Unit', field: 'unit', editable: false}
+      ])
+
+      const classPropColumnDefs = ref([
+        { headerName: '속성ID', field: 'propId', width: 150 },
+        { headerName: '속성명', field: 'propId'},
+        { headerName: '보임', field: 'isShow', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
+        { headerName: '읽기', field: 'isReadOnly', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
+        { headerName: '수정', field: 'isDisabled', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
+        { headerName: '순서', field: 'dispSeq', width: 120, sort: 'asc', editable: true, sortable: true },
+        { headerName: '수정일', field: 'updateDate', width: 200 },
+        { headerName: '수정자', field: 'updater', width: 200 },
+      ])
 
       const classTreeData = ref({
           enable: true,
@@ -139,11 +306,11 @@
               { headerName: 'Enable', field: 'isEnable'}
           ],
           options: {
-              sidebar: false,
+              sideBar: false,
               rowSelection: 'single',
               treeData: true,
+              pagination: false,
               getDataPath: function(data) {
-                  console.log(data)
                   return data.treePath
               },
               autoGroupColumnDef: {
@@ -159,12 +326,15 @@
       })
 
       return {
+        columnDefs, classPropColumnDefs, propColumnDefs,
         classTreeData, classGridOption,
         state: store?.state,
         msg,
         showModal: ref(false),
+        showClassPropModal: ref(false),
+        showClassPropInputModal: ref(false),
         formRef,
-        model,
+        model, classPropModel,
         rules: {
           classId: {
             required: true,
@@ -177,6 +347,28 @@
             message: 'Required'
           },   
           isEnable: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },
+        },
+        classPropRules: {
+          propId: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },
+          isShow: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },   
+          isReadOnly: {
+            required: true,
+            trigger: ['blur', 'input'],
+            message: 'Required'
+          },
+          isDisalbed: {
             required: true,
             trigger: ['blur', 'input'],
             message: 'Required'
@@ -197,13 +389,18 @@
 
     data(){
       return {
-        gridApi: null
+        gridApi: null,
+        gridApi2: null,
+        classId: null
       }
     },
 
     computed: {
         domainId() {
             return this.state.domain.domainId
+        },
+        domainName() {
+            return this.state.domain.domainName
         }
     },
 
@@ -215,8 +412,13 @@
 
     methods: {
       gridReady(params){
-        this.gridApi = params.api
-        this.loadData(this.state.domain.domainId)       
+        this.gridApi = params.api    
+        this.loadData(this.domainId)             
+      },
+
+      gridReady2(params){
+        this.gridApi2 = params.api         
+        this.loadClassPropData(this.domainId, this.classId)    
       },
 
       loadData(domainId){  
@@ -237,8 +439,25 @@
           }
       },
 
-      selectedItem(data){
-        
+      loadClassPropData(domainId, classId){  
+          if(domainId != ''){
+              get({
+                url: '/api/classes/' + domainId+ '/' + classId,
+                data: () => {
+                    return {}
+                },
+                })
+                .then((res) => {
+                    this.gridApi2.setRowData(res.classProp)
+                })
+                .catch(console.log)
+          }
+      },
+
+      selectedItem(params){ 
+        this.classId = params.data.classId  
+        this.classPropModel.domainMessage = '['+this.domainId+'] ' + this.domainName
+        this.classPropModel.classMessage = '['+this.classId+'] ' + messageGetter(params) 
       },
 
       setMessageId(value){
@@ -250,17 +469,46 @@
           domainId: this.domainId,
           classId: this.model.classId,
           parentId: this.model.parentId,
-          parentMessage: '',
           messageId: this.model.messageId,
+          dispSeq: this.model.dispSeq,
           isEnable: this.model.isEnable
         }
       },
 
-      saveData(){
+      getClassPropFormValue(){
+        return {
+          domainId: this.domainId,
+          classId: this.classId,
+          propId: this.classPropModel.propId,          
+          isReadOnly: this.classPropModel.isReadOnly,
+          isDisabled: this.classPropModel.isDisabled,
+          isShow: this.classPropModel.isShow,
+          dispSeq: this.classPropModel.dispSeq
+        }
+      },
+
+      saveClassProp(){
+        this.$refs.formRef2.validate(
+          (errors) => {
+            if (!errors) {
+                  post({
+                    url: '/api/classProps',
+                    data: this.getClassPropFormValue()
+                }).then(res=> {
+                    this.msg.success('Success!!')
+                    this.showClassPropInputModal = false
+                    this.loadClassPropData(this.domainId, this.classId)
+                })
+            } else {
+                msg.error('Invalid')
+            }
+          }
+        )
+      },
+      saveData() {
         this.$refs.formRef.validate(
           (errors) => {
             if (!errors) {
-                console.log(this.getFormValue())
                   post({
                     url: '/api/classes',
                     data: this.getFormValue()
@@ -281,23 +529,46 @@
         if(selectedData.length > 0) {         
 
           del({
-            url: '/api/classes/'+this.state.domain.domainId + '/'+selectedData[0].classId
+            url: '/api/classes/'+this.domainId + '/'+selectedData[0].classId
           }).then(res=> {
              this.gridApi.applyTransaction({ remove: selectedData });
           })
         }
       },
 
+      deleteClassProp(){
+        let selectedData = this.gridApi2.getSelectedRows()
+        if(selectedData.length > 0) {  
+          del({
+            url: '/api/classProps/'+this.domainId + '/'+this.classId +'/' +selectedData[0].propId
+          }).then(res=> {
+             this.gridApi2.applyTransaction({ remove: selectedData });
+          })
+        }
+      },
+
       getValue(data) {
             return {
-                domainId: this.state.domain.domainId,
+                domainId: this.domainId,
+                parentId: data.parentId,
                 classId: data.classId,
                 isEnable: data.isEnable,
-                message: {
-                  messageId: data.message.messageId
-                }
+                messageId: data.message.messageId,
+                dispSeq: data.dispSeq
             }
         },
+
+      getClassPropValue(data){
+        return {
+          domainId: this.domainId,
+          classId: this.classId,
+          propId: data.propId,          
+          isReadOnly: data.isReadOnly,
+          isDisabled: data.isDisabled,
+          isShow: data.isShow,
+          dispSeq: data.dispSeq
+        }
+      },
 
       cellValueChanged(params) {
              post({
@@ -308,8 +579,24 @@
                 this.showMessageModal = false
             })
         },
+
+      classPropChanged(params) {
+             post({
+                url: '/api/classProps',
+                data: this.getClassPropValue(params.data)
+            }).then(res=> {
+                this.msg.success('Success!!')
+                this.showMessageModal = false
+            })
+        },
       setParentId(parentId){
           this.model.parentId = parentId
+      },
+      setPropId(propId){
+        this.classPropModel.propId = propId
+      },
+      classPropInit(){
+        this.showClassPropInputModal = true
       }
     }
   })
