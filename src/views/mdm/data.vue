@@ -1,7 +1,27 @@
 <template>
    <n-space vertical size="large">
-      <n-layout has-sider position="static">
-        <n-layout-sider ref="siderRef" style="min-width:300px; width: 300px; height: 88vh;"> 
+       <n-page-header subtitle="A podcast to improve designs">
+        <template #title>
+          <n-gradient-text
+            gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)"
+          >
+            Data Manager
+          </n-gradient-text>
+        </template>
+        <template #avatar>
+          <n-avatar
+            src="https://cdnimg103.lizhi.fm/user/2017/02/04/2583325032200238082_160x160.jpg"
+          />
+        </template>
+        <template #extra>
+          <n-space>
+            <n-button @click="showModal = true">Add</n-button>
+            <n-button @click="remove">Delete</n-button>
+          </n-space>
+        </template>
+      </n-page-header>  
+      <n-layout has-sider position="static">          
+        <n-layout-sider ref="siderRef" style="min-width:300px; width: 300px; height: calc(80vh - 15px);"> 
           <InputAgGrid style="padding: 2px; height: 100%;"
                 class="ag-theme-alpine"      
                 @cell-clicked="selectedClass"

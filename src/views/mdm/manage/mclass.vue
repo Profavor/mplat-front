@@ -64,7 +64,7 @@
           }"
         >
           <n-form-item label="Domain" path="domainId">
-            <InputRef v-model:value="domainId" placeholder="Input" url="/api/domains" entityId="domainId" :disabled="true" />
+            <InputRef v-model:value="model.domainMessage" placeholder="Input" url="/api/domains" entityId="domainId" :columnDefs="domainColumnDefs" @pickEntityId="setDomainId" />
           </n-form-item>
           <n-form-item label="Class ID" path="classId">
             <n-input v-model:value="model.classId" placeholder="Input" />
@@ -217,11 +217,13 @@
 <script>  
   import { get, post, del } from '@/api/http'
   import { defineComponent, ref, onMounted } from 'vue'
-  import { messageGetter, messageSetter, makeTreePath, dataGetter } from '@/utils'
+  import { messageGetter, messageSetter, makeTreePath, dataGetter, dataSetter } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
   import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
   import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
+  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.js'
+  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.js'
   import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.js'
   import { useStore } from '@/store/store'
 
@@ -230,6 +232,8 @@
     components: {
       messageEditor: MessageEditor, 
       messageRenderer: MessageRenderer,
+      refEditor: RefEditor,
+      refRenderer: RefRenderer,
       numberEditor: NumberEditor,
       CloseIcon
     },
@@ -241,6 +245,8 @@
       const msg = useMessage()
 
       const model = ref({
+        domainId: null,
+        domainMessage: null,
         classId: null,
         message: null,
         messageId: "",
@@ -260,7 +266,16 @@
         isShow: 'Y'
       })
 
+      const domainColumnDefs = ref([
+        {headerName: 'ID', field: 'domainId'},
+        {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
+          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, width: 260},
+        {headerName: 'USE', width:120, field: 'isEnable', cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true},
+      ])
+
       const columnDefs = ref([ 
+        {headerName: 'Domain', valueGetter: dataGetter, valueSetter: dataSetter, toColDef: { field: 'domain', entityId: 'domainId', entityColDef: domainColumnDefs, url: '/api/domains'}, 
+          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: true},
         {headerName: 'ID', field: 'classId'},        
         {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
           cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, flex: 1},    
@@ -326,7 +341,7 @@
       })
 
       return {
-        columnDefs, classPropColumnDefs, propColumnDefs,
+        columnDefs, classPropColumnDefs, propColumnDefs, domainColumnDefs,
         classTreeData, classGridOption,
         state: store?.state,
         msg,
@@ -404,12 +419,6 @@
         }
     },
 
-    watch: {
-        domainId: function(domainId) {
-            this.loadData(domainId)   
-        }
-    },
-
     methods: {
       gridReady(params){
         this.gridApi = params.api    
@@ -421,28 +430,26 @@
         this.loadClassPropData(this.domainId, this.classId)    
       },
 
-      loadData(domainId){  
-          if(domainId != ''){
-              get({
-                url: '/api/classes/' + this.state.domain.domainId,
-                data: () => {
-                    return {
-                    
-                    }
-                },
-                })
-                .then((res) => {
-                    let data = makeTreePath(res, 'classId', 'parentId', 'children')
-                    this.gridApi.setRowData(data)
-                })
-                .catch(console.log)
-          }
+      loadData(){  
+          get({
+            url: '/api/classes',
+            data: () => {
+                return {
+                
+                }
+            },
+            })
+            .then((res) => {
+                let data = makeTreePath(res, 'classId', 'parentId', 'children')
+                this.gridApi.setRowData(data)
+            })
+            .catch(console.log)
       },
 
       loadClassPropData(domainId, classId){  
           if(domainId != ''){
               get({
-                url: '/api/classes/' + domainId+ '/' + classId,
+                url: '/api/classes/' + classId,
                 data: () => {
                     return {}
                 },
@@ -466,7 +473,7 @@
 
       getFormValue(){
         return {
-          domainId: this.domainId,
+          domainId: this.model.domainId,
           classId: this.model.classId,
           parentId: this.model.parentId,
           messageId: this.model.messageId,
@@ -529,7 +536,7 @@
         if(selectedData.length > 0) {         
 
           del({
-            url: '/api/classes/'+this.domainId + '/'+selectedData[0].classId
+            url: '/api/classes/'+selectedData[0].classId
           }).then(res=> {
              this.gridApi.applyTransaction({ remove: selectedData });
           })
@@ -540,7 +547,7 @@
         let selectedData = this.gridApi2.getSelectedRows()
         if(selectedData.length > 0) {  
           del({
-            url: '/api/classProps/'+this.domainId + '/'+this.classId +'/' +selectedData[0].propId
+            url: '/api/classProps/'+this.classId +'/' +selectedData[0].propId
           }).then(res=> {
              this.gridApi2.applyTransaction({ remove: selectedData });
           })
@@ -549,7 +556,7 @@
 
       getValue(data) {
             return {
-                domainId: this.domainId,
+                domainId: data.domain.domainId,
                 parentId: data.parentId,
                 classId: data.classId,
                 isEnable: data.isEnable,
@@ -560,8 +567,8 @@
 
       getClassPropValue(data){
         return {
-          domainId: this.domainId,
-          classId: this.classId,
+          domainId: data.domain.domainId,
+          classId: data.classId,
           propId: data.propId,          
           isReadOnly: data.isReadOnly,
           isDisabled: data.isDisabled,
@@ -594,6 +601,9 @@
       },
       setPropId(propId){
         this.classPropModel.propId = propId
+      },
+      setDomainId(domainId){
+        this.model.domainId = domainId
       },
       classPropInit(){
         this.showClassPropInputModal = true

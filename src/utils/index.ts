@@ -293,12 +293,12 @@ export function dataSetter(params: any): boolean {
   const lang = 'ko' 
   
   const newValue = params.newValue
+
   if(newValue.startsWith("{") && newValue.endsWith("}")){
     let parse = JSON.parse(newValue)
     if(typeof data != 'undefined' && data != null) {
-      data.sectionId = parse.entityId
+      eval('data.' + params.colDef.toColDef.entityId + ' = parse.entityId')
       let message = data.message
-      console.log(message)
       for(let index in message.messageLangs){
         if(message.messageLangs[index].lang == lang){
             message.messageLangs[index].message = parse.message
