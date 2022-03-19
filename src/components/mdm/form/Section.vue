@@ -7,13 +7,20 @@
         pane-style="padding: 20px;"
 
         >
-        <n-tab-pane v-for="section in form.msections" :key="section.sectionId" :name="section.message">
+        <n-tab-pane v-for="section in columnData.msections" :key="section.sectionId" :name="section.message">
           <n-card>
-            <n-form ref="formRef">
+            <n-form ref="formRef"
+               label-placement="left"
+               require-mark-placement="right-hanging"
+               label-width="auto"
+               :style="{
+                  maxWidth: '1240px'
+               }"
+            >
               <template #header-extra></template>
               <n-collapse default-expanded-names="1" accordion>
                 <n-collapse-item  v-for="group in section.mgroups" :key="group.groupId" :title="group.message">
-                  <n-form-item v-for="prop in group.props" :key="prop.propId" :label="prop.message" path="prop.value">
+                  <n-form-item v-for="prop in group.props" :key="prop.propId" :label="prop.message" :path="prop.value">     
                     <n-input v-if="prop.type === 'STRN'" v-model:value="prop.value"  />
                     <n-input-number v-if="prop.type ==='NVAL'" v-model:value="prop.value" clearable >
                       <template #prefix>{{prop.unit}}</template>
@@ -33,127 +40,107 @@
   </n-card>
 </template>
 
-<script lang="ts">
+<script>
   import { defineComponent, ref } from 'vue'
 
   export default defineComponent({
      name: 'FormSection',
-    setup() {
-      const form = ref({
-         "domain":{
-            "domainId":"FINANCE"
-         },
-         "mclass":{
-            "classId":"SECTOR",
-            "message":"업종"
-         },
-         "msections":[
-            {
-               "sectionId":"BASIC",
-               "dispSeq":"1",
-               "isEnable":"Y",
-               "message":"기본정보",
-               "mgroups":[
-                  {
-                     "groupId":"STANDARD",
-                     "dispSeq":"1",
-                     "isEnable":"Y",
-                     "message":"표준 속성",
-                     "props":[
-                        {
-                           "propId":"EVENT_CODE",
-                           "areaId":"*",
-                           "type":"STRN",
-                           "unit":"",
-                           "width":"100",
-                           "regex":"",
-                           "ruleCode":"",
-                           "mask":"",
-                           "dbType":"VARCHAR(100)",
-                           "message":"종목코드",
-                           "value":"Test",
-                           "reference":"",
-                           "propMode":null,
-                           "options":{
-                              "propMode":null,
-                              "isDisabled":"N",
-                              "isReadOnly":"N",
-                              "isShow":"Y",
-                              "dispSeq":"10"
-                           }
-                        },
-                        {
-                           "propId":"EVENT_NUMBER",
-                           "areaId":"*",
-                           "type":"NVAL",
-                           "unit":"NO",
-                           "width":"100",
-                           "regex":"",
-                           "ruleCode":"",
-                           "mask":"",
-                           "dbType":"VARCHAR(100)",
-                           "message":"종목번호",
-                           "value": 0,
-                           "reference":"",
-                           "propMode":null,
-                           "options":{
-                              "propMode":null,
-                              "isDisabled":"N",
-                              "isReadOnly":"N",
-                              "isShow":"Y",
-                              "dispSeq":"10"
-                           }
-                        },
-                        {
-                           "propId":"ETC_FILE",
-                           "areaId":"*",
-                           "type":"FILE",
-                           "unit":"",
-                           "width":"100",
-                           "regex":"",
-                           "ruleCode":"",
-                           "mask":"",
-                           "dbType":"VARCHAR(100)",
-                           "message":"일반 파일",
-                           "reference":"",
-                           "propMode":null,
-                           "options":{
-                              "propMode":null,
-                              "isDisabled":"N",
-                              "isReadOnly":"N",
-                              "isShow":"Y",
-                              "dispSeq":"15"
-                           }
-                        },
-                        {
-                           "propId":"CODE_REF",
-                           "areaId":"*",
-                           "type":"CODE",
-                           "unit":"",
-                           "width":"150",
-                           "regex":"",
-                           "ruleCode":"",
-                           "mask":"",
-                           "dbType":"VARCHAR(100)",
-                           "message":"코드 테스트",
-                           "reference":"LANGAUGE",
-                           "value": "KO",
-                           "propMode":null,
-                           "options":{
-                              "propMode":null,
-                              "isDisabled":"N",
-                              "isReadOnly":"N",
-                              "isShow":"Y",
-                              "dispSeq":"12"
-                           }
-                        }
-                     ]
+     
+     props: {
+        domainId: {
+           type: String,
+           default: ""
+        },
+        classId: {
+           type: String,
+           default: ""
+        },
+        columnData: {
+           type: Object,
+           default: function(){
+              return {}
+           }
+        },
+        masterId: {
+           type: String,
+           default: null
+        },
+        codeGroupId: {
+           type: String,
+           default: null
+        },
+        isMasterCode: {
+           type: Boolean,
+           default: true
+        }
+     },
+    setup(props, {emit}) {
+      
+      return {  }
+    },
+
+    data() {
+       return {
+
+       }
+    },
+
+   methods: {
+      getValue(){
+         let data = []            
+         for(let i in this.columnData.msections){
+               let msections = this.columnData.msections[i]
+               for(let j in msections.mgroups){
+                  let mgroups = msections.mgroups[j]
+                  for(let k in mgroups.props){
+                     let props = mgroups.props[k]
+                     if(props.value){
+                           data.push({
+                              propId: props.propId,
+                              value: props.value,
+                           })
+                     }else{
+                        data.push({
+                           propId: props.propId,
+                           value: null
+                        })
+                     }
                   }
-               ]
+               }
             }
-         ]
-      })
-      return { form }
+
+          if(this.isMasterCode){
+              let masterData = {
+                  "masterId": this.masterId,
+                  "domainId": this.domainId,
+                  "classId": this.classId,
+                  "data": data
+              }
+              return masterData   
+            } else { 
+               let codeGroupData = {
+                  codeGroupId: this.codeGroupId,  
+                  data: data
+              }
+              return codeGroupData   
+            }
+      },
+      validation() {
+         let flag = true
+         for(let i in this.$refs.formRef){
+            this.$refs.formRef[i].validate(
+               (errors) => {
+                  if (errors) {
+                     flag = false
+                  }
+               }
+            )
+         }
+         return flag
+      },
+      init(){
+
+      }
    }
 })
 </script>

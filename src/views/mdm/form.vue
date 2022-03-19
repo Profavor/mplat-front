@@ -1,6 +1,6 @@
 <template>
   <div>
-    <FormSection />
+    <FormSection domainId="TEST" masterId="" />
   </div>
 </template>
 

@@ -20,7 +20,7 @@ const service = Axios.create({
 
 service.interceptors.request.use(
   (config) => {
-    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MDIzMjg3LCJpYXQiOjE2NDc2NjMyODd9.NOTHU2kKPY8zy2bAQdt_h7_Qzp2OJGMNgyeissOjAYg'
+    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MDQ5MDI2LCJpYXQiOjE2NDc2ODkwMjZ9.UsiW_ZPWVTcnQdo5E7TZHMloQJx-3jdP_ZDLGKsIIaY'
     !config.headers && (config.headers = {})
     if (!config.headers[CONTENT_TYPE]) {
       config.headers[CONTENT_TYPE] = APPLICATION_JSON

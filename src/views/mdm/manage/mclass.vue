@@ -217,7 +217,7 @@
 <script>  
   import { get, post, del } from '@/api/http'
   import { defineComponent, ref } from 'vue'
-  import { messageGetter, messageSetter, makeTreePath, dataGetter, dataSetter } from '@/utils'
+  import { messageGetter, messageSetter, makeTreePath, dataGetter, dataSetter, getMessageName } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
   import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.vue'
@@ -257,7 +257,9 @@
 
       const classPropModel = ref({
         domainMessage: null,
+        domainId: null,
         classMessage: null,
+        classId: null,
         propMessage: null,
         propId: null,
         dispSeq: 0,
@@ -409,24 +411,15 @@
       }
     },
 
-    computed: {
-        domainId() {
-            return this.state.domain.domainId
-        },
-        domainName() {
-            return this.state.domain.domainName
-        }
-    },
-
     methods: {
       gridReady(params){
         this.gridApi = params.api    
-        this.loadData(this.domainId)             
+        this.loadData()             
       },
 
       gridReady2(params){
         this.gridApi2 = params.api         
-        this.loadClassPropData(this.domainId, this.classId)    
+        this.loadClassPropData(this.classId)    
       },
 
       loadData(){  
@@ -445,8 +438,8 @@
             .catch(console.log)
       },
 
-      loadClassPropData(domainId, classId){  
-          if(domainId != ''){
+      loadClassPropData(classId){  
+          if(classId != ''){
               get({
                 url: '/api/classes/' + classId,
                 data: () => {
@@ -460,10 +453,12 @@
           }
       },
 
-      selectedItem(params){ 
+      selectedItem(params){    
         this.classId = params.data.classId  
-        this.classPropModel.domainMessage = '['+this.domainId+'] ' + this.domainName
+        this.classPropModel.domainMessage = '['+params.data.domain.domainId+'] ' + getMessageName(params.data.domain.message)
+        this.classPropModel.domainId = params.data.domain.domainId
         this.classPropModel.classMessage = '['+this.classId+'] ' + messageGetter(params) 
+        this.classPropModel.classId = params.data.classId  
       },
 
       setMessageId(value){
@@ -483,8 +478,8 @@
 
       getClassPropFormValue(){
         return {
-          domainId: this.domainId,
-          classId: this.classId,
+          domainId: this.classPropModel.domainId,
+          classId: this.classPropModel.classId,
           propId: this.classPropModel.propId,          
           isReadOnly: this.classPropModel.isReadOnly,
           isDisabled: this.classPropModel.isDisabled,
@@ -503,7 +498,7 @@
                 }).then(res=> {
                     this.msg.success('Success!!')
                     this.showClassPropInputModal = false
-                    this.loadClassPropData(this.domainId, this.classId)
+                    this.loadClassPropData(this.classId)
                 })
             } else {
                 msg.error('Invalid')
@@ -564,9 +559,9 @@
             }
         },
 
-      getClassPropValue(data){
+      getClassPropValue(data){ 
         return {
-          domainId: data.domain.domainId,
+          domainId: data.domainId,
           classId: data.classId,
           propId: data.propId,          
           isReadOnly: data.isReadOnly,

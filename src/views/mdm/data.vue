@@ -45,6 +45,38 @@
             /> 
         </n-layout-content>
       </n-layout>
+
+    <n-modal 
+      v-model:show="showModal"
+    >
+      <n-card
+        title="Master Management"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        style="width: 1000px;"
+      >
+        <template #header-extra>
+          <n-button tertiary circle type="error" @click="showModal = false">
+            <template #icon>
+              <n-icon><close-icon /></n-icon>
+            </template>
+          </n-button>
+        </template>
+        <n-space vertical>
+            <FormSection :domainId="domainId" :classId="classId" :columnData="columnData" ref="formSectionRef" />
+        </n-space>
+        <template #footer>
+          <n-space justify="end">
+              <n-button round type="primary" @click="saveData">
+                  Save
+              </n-button>
+          </n-space>
+        </template>
+      </n-card>
+  </n-modal>
+
   </n-space>
 </template>
 
@@ -53,9 +85,14 @@
   import { defineComponent, ref, onMounted } from 'vue'
   import { messageGetter, messageSetter, makeTreePath, dataGetter } from '@/utils'
   import { useStore } from '@/store/store'
+  import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
 
   export default defineComponent({
-    name: 'MdmForm',
+    name: 'MdmData',
+
+    components: {
+        CloseIcon
+    },
 
     setup(){
       const store = useStore()
@@ -97,6 +134,7 @@
       })
 
       return {
+          showModal: ref(false),
           columnDefs,
           state: store?.state,
           classTreeData, 
@@ -108,25 +146,15 @@
         return {
             gridApi: null,
             gridApi2: null,
-            classId: ""            
+            domainId: "",
+            classId: "",
+            columnDefsData: null          
         }
     },
 
     computed: {
-        domainId() {
-            return this.state.domain.domainId
-        },
-        domainName() {
-            return this.state.domain.domainName
-        },
         lang() {
             return this.state.user.lang
-        }
-    },
-
-    watch: {
-        domainId: function(domainId) {
-            //TODO: 도메인 변경시 리로딩
         }
     },
 
@@ -135,12 +163,13 @@
             if(this.domainId != '' && this.classId != ''){
                 get({url: '/api/master/form/'+this.domainId +'/'+this.classId+'?lang='+this.lang})
                 .then(res=> {
+                    this.columnData = res
                     this.convertPropData(res)
 
                     get({
                         url: '/api/master/getData/'+this.domainId +'/'+this.classId
                     }).then(res=> {
-                        console.log(res)
+                        this.gridApi2.setRowData(res)
                     })
                 })
             }
@@ -148,20 +177,31 @@
 
         refresh() {
             get({url: '/api/master/getData/'+this.domainId +'/'+ this.classId}).then(res=> {
-                console.log(res)
+                this.gridApi2.setRowData(res)
             })
         },
 
         convertPropData(data) {
             this.columnDefs = []
             this.columnDefs.push({headerName: "Master", children: [{headerName: "ID", width: 130, field: 'master_id'}]})
-            for(let i in data.msections) {
-                let groups = data.msections[i].mgroups
+            let sections = data.msections
+            sections.sort(function(a, b){
+                return a.dispSeq - b.dispSeq
+            }) 
+            for(let i in sections) {
+                let groups = sections[i].mgroups
+                groups.sort(function(a, b){
+                    return a.dispSeq - b.dispSeq
+                }) 
                 for(let j in groups) {
                     let group = {}
                     group.headerName = groups[j].message
                     group.children = []
                     let props = groups[j].props
+
+                    props.sort(function(a, b){
+                        return a.options.dispSeq - b.options.dispSeq
+                    })                    
                     for(let k in props) {
                         if(props[k].options.isShow == 'Y'){
                             if(props[k].type == 'DATE'){
@@ -186,6 +226,7 @@
         },
 
         selectedClass(params){
+            this.domainId = params.data.domain.domainId
             this.classId = params.data.classId
             this.setColumnDef()
         },
@@ -201,13 +242,21 @@
         },
 
         loadClass() {
-            get({url: '/api/classes/'+this.domainId+'?isEnable=Y'})
+            get({url: '/api/classes?isEnable=Y'})
             .then(res => {
-                let data = makeTreePath(res, 'classId', 'parentId', 'children')
+                let data = makeTreePath(res, 'classId', 'parentId', 'children')                
                 this.gridApi.setRowData(data)
             })
             .catch(err => console.log(err))
 
+        },
+
+        saveData() {
+            if(this.$refs.formSectionRef.validation()){
+                post({url: '/api/master', data: () => this.$refs.formSectionRef.getValue()}).then(res=> {
+                    this.showModal = false
+                })
+            }           
         }
     }
   })

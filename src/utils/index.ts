@@ -398,7 +398,9 @@ export function messageSetterEn(e: any): boolean {
   return false;
 }
 
-export function getMessageName(message: any, lang: string){
+export function getMessageName(message: any){
+  const lang = 'ko'
+  
   if(message != null){
     for(let index in message.messageLangs) {
       if(message.messageLangs[index].lang === lang) {

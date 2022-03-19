@@ -311,7 +311,7 @@
                 }).then(res=> {
                     this.msg.success('Success!!')
                     this.showModal = false
-                    this.load()
+                    this.loadProp()
                 })
             } else {
                 this.msg.error('Invalid')
