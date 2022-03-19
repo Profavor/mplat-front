@@ -20,7 +20,7 @@ export default ({ command, mode }) => {
       ],
     },
     server: {
-      open: true,
+      open: false,
       host: '0.0.0.0'
     },
     build: {
