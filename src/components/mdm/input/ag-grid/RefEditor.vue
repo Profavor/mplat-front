@@ -1,12 +1,12 @@
-import {nextTick} from 'vue';
-
-
-export default {
-    template: `
-      <n-message-provider>
+<template>
+    <n-message-provider>
         <InputRef v-model:value="message" placeholder="Input" :columnDefs="entityColDef" :url="url" :entityId="entityId" @pickEntityId="setEntityId" />
       </n-message-provider>
-    `,
+</template>
+
+<script>
+
+export default {
     components: {
         
     },
@@ -30,7 +30,6 @@ export default {
 
         setEntityId(entityId){
             this.value = JSON.stringify({entityId: entityId, message: this.message})
-            console.log(this.value)
         }
 
     },
@@ -47,3 +46,5 @@ export default {
         }        
     },
 };
+
+</script>

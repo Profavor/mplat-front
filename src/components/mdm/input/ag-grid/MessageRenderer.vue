@@ -1,5 +1,11 @@
+<template>
+    <div>{{message}}</div>
+</template>
+
+
+<script>
 export default {
-    template: '<div>{{message}}</div>',
+    name: 'messageRenderer',
     data() {
         return {
             messageId: '',
@@ -18,3 +24,4 @@ export default {
         }   
     }
 };
+</script>

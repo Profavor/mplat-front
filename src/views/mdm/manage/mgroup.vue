@@ -107,11 +107,11 @@
   import { messageGetter, messageSetter, dataGetter, dataSetter } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
-  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
-  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
-  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.js'
-  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.js'
-  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.js'
+  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.vue'
+  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.vue'
+  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.vue'
+  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.vue'
+  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.vue'
 
   export default defineComponent({
     name: 'MdmManageGroup',

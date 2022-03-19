@@ -7,10 +7,7 @@ import { InjectionKey } from 'vue'
 
 export default createStore<RootState>({
   state: {
-    root: 'this is root',
-    user: {},
-    app: {},
-    domain: {}
+    root: 'this is root'
   },
   modules: {
     user: userModule,

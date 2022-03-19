@@ -1,8 +1,5 @@
 export interface RootState {
   root: string
-  user: any
-  app: any
-  domain: any
 }
 
 export interface AppState {

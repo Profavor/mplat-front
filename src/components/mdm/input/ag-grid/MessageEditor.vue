@@ -1,15 +1,12 @@
-import {nextTick} from 'vue';
-
-
-export default {
-    template: `
-      <n-message-provider>
+<template>
+     <n-message-provider>
         <InputMessage v-model:value="message" @pickMessageId="setMessageId" />
       </n-message-provider>
-    `,
-    components: {
-        
-    },
+</template>
+
+<script>
+export default {
+    name: 'messageEditor',
     data() {
         return {
             messageId: "",
@@ -42,3 +39,4 @@ export default {
         }        
     },
 };
+</script>

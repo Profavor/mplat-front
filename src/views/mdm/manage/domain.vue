@@ -98,8 +98,8 @@
   import { messageGetter, messageSetter } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
-  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
-  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
+  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.vue'
+  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.vue'
 
   export default defineComponent({
     name: 'MdmManageDomain',

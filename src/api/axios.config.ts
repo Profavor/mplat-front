@@ -1,7 +1,8 @@
 import Axios, { AxiosResponse } from 'axios'
 import qs from 'qs'
 
-export const baseURL = 'http://localhost:8080/'
+export const baseURL = 'http://prusoft.synology.me:28080/'
+//export const baseURL = 'http://localhost:8080/'
 
 export const CONTENT_TYPE = 'Content-Type'
 
@@ -19,7 +20,7 @@ const service = Axios.create({
 
 service.interceptors.request.use(
   (config) => {
-    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ3OTM3NzIwLCJpYXQiOjE2NDc1Nzc3MjB9.poh4xiAsCTXtaTVL2EJyAhckyYMDvW0dmqqAGtcAazg'
+    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MDIzMjg3LCJpYXQiOjE2NDc2NjMyODd9.NOTHU2kKPY8zy2bAQdt_h7_Qzp2OJGMNgyeissOjAYg'
     !config.headers && (config.headers = {})
     if (!config.headers[CONTENT_TYPE]) {
       config.headers[CONTENT_TYPE] = APPLICATION_JSON

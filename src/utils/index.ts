@@ -266,7 +266,10 @@ export function messageGetter(e: any): string {
 
 export function dataGetter(params: any) {
   const lang = 'ko'
-  let data = eval('params.node.data.'+params.colDef.toColDef.field)
+  let dataFunc = new Function('params', 'return params.node.data.'+params.colDef.toColDef.field)
+  let data = dataFunc(params)
+  let entityIdFunc = new Function('data', 'return data.' + params.colDef.toColDef.entityId)
+  let entityId = entityIdFunc(data)
 
   if(data == null){
     return '';
@@ -274,13 +277,13 @@ export function dataGetter(params: any) {
   if(typeof data.message != 'undefined' && data.message != null) {
     for(let index in data.message.messageLangs){
       if(data.message.messageLangs[index].lang == lang){
-        return '['+eval('data.'+ params.colDef.toColDef.entityId)+'] '+data.message.messageLangs[index].message
+        return '['+entityId+'] '+data.message.messageLangs[index].message
       }
     }
   }else if(typeof data.messageLangs != 'undefined') {
     for(let index in data.messageLangs){
       if(data.messageLangs[index].lang == lang){
-        return '['+eval('data.'+ params.colDef.toColDef.entityId)+'] '+ data.messageLangs[index].message
+        return '['+entityId+'] '+ data.messageLangs[index].message
       }
     }
   }
@@ -288,8 +291,9 @@ export function dataGetter(params: any) {
 }
 
 export function dataSetter(params: any): boolean {
-  let data = eval('params.node.data.'+params.colDef.toColDef.field)
-  
+  let dataFunc = new Function('params', 'return params.node.data.'+params.colDef.toColDef.field)
+  let data = dataFunc(params)
+
   const lang = 'ko' 
   
   const newValue = params.newValue
@@ -297,7 +301,7 @@ export function dataSetter(params: any): boolean {
   if(newValue.startsWith("{") && newValue.endsWith("}")){
     let parse = JSON.parse(newValue)
     if(typeof data != 'undefined' && data != null) {
-      eval('data.' + params.colDef.toColDef.entityId + ' = parse.entityId')
+      data[params.colDef.toColDef.entityId] = parse.entityId
       let message = data.message
       for(let index in message.messageLangs){
         if(message.messageLangs[index].lang == lang){
@@ -411,11 +415,15 @@ export function unflatten(arr: any, id: any, parentId: any) {
       arrElem,
       mappedElem;
 
+  
+
   // First map the nodes of the array to an object -> create a hash table.
   for(let i = 0, len = arr.length; i < len; i++) {
     arrElem = arr[i];
-    mappedArr[eval('arrElem.'+id)] = arrElem;
-    mappedArr[eval('arrElem.'+id)]['children'] = [];
+    let idFunc = new Function('arrElem', 'return arrElem.'+id)
+    let arrId = idFunc(arrElem)
+    mappedArr[arrId] = arrElem;
+    mappedArr[arrId]['children'] = [];
   }
 
 
@@ -423,7 +431,7 @@ export function unflatten(arr: any, id: any, parentId: any) {
     if (mappedArr.hasOwnProperty(id)) {
       mappedElem = mappedArr[id];
       // If the element is not at the root level, add it to its parent array of children.
-      if (eval('mappedElem.'+ parentId)) {
+      if (mappedElem['parentId']) {
         mappedArr[mappedElem['parentId']]['children'].push(mappedElem);        
       }
       // If the element is at the root level, add it to first level elements array.
@@ -449,26 +457,26 @@ export function makeTreePath(arr2: any, id: any, parentId: any, children: any){
     while(!queue.isEmpty()){
         let d = queue.pop()
 
-        if(eval('d.'+children+'.length > 0')){
+        if(d[children].length > 0){
             d.isLeaf = false
         }else{
             d.isLeaf = true
         }
 
-        if(typeof map[eval('d.' +parentId)] == 'undefined'){
-           map[eval('d.' +parentId)] = []
+        if(typeof map[d[parentId]] == 'undefined'){
+           map[d[parentId]] = []
         }
 
-        map[eval('d.'+ id)] = JSON.parse(JSON.stringify(map[eval('d.' +parentId)]))
-        map[eval('d.'+ id)].push(eval('d.'+ id))
+        map[d[id]] = JSON.parse(JSON.stringify(map[d[parentId]]))
+        map[d[id]].push(d[id])
 
-        let loop = eval('d.'+ children)
+        let loop = d[children]
 
         for(let i in loop) {
-            queue.push(eval('d.'+ children + '[i]'))
+            queue.push(d[children][i])
         }
 
-        d.treePath = map[eval('d.'+ id)]
+        d.treePath = map[d[id]]
         data.push(d)
     }
     return data

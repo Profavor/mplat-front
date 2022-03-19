@@ -1,7 +1,9 @@
+<template>
+    <n-input-number v-model:value="value" clearable />
+</template>
+
+<script>
 export default {
-    template: `
-        <n-input-number v-model:value="value" clearable />
-    `,
     components: {
         
     },
@@ -23,3 +25,4 @@ export default {
         this.value = this.params.value       
     },
 };
+</script>

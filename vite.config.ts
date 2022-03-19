@@ -21,7 +21,12 @@ export default ({ command, mode }) => {
     },
     server: {
       open: true,
+      host: '0.0.0.0'
     },
+    build: {
+      sourcemap: true,
+      manifest: true
+    }
   }
   if (command === 'build' && mode === 'staging') {
     return Object.assign(

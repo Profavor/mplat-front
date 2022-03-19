@@ -73,7 +73,7 @@
             <InputMessage v-model:value="model.message" @pickMessageId="setMessageId" />
           </n-form-item>
           <n-form-item label="Parent Class" path="parentId">
-            <InputRef v-model:value="model.parentMessage" placeholder="Input" :columnDefs="classGridOption.columnDefs" :gridOptions="classGridOption.options" :url="'/api/classes/'+domainId" entityId="classId" :treeData="classTreeData"  @pickEntityId="setParentId"/>
+            <InputRef v-model:value="model.parentMessage" placeholder="Input" :columnDefs="classGridOption.columnDefs" :gridOptions="classGridOption.options" :url="'/api/classes'" entityId="classId" :treeData="classTreeData"  @pickEntityId="setParentId"/>
           </n-form-item>
           <n-form-item label="Display Seq" path="dispSeq">
             <n-input-number v-model:value="model.dispSeq" clearable />
@@ -216,15 +216,15 @@
 
 <script>  
   import { get, post, del } from '@/api/http'
-  import { defineComponent, ref, onMounted } from 'vue'
+  import { defineComponent, ref } from 'vue'
   import { messageGetter, messageSetter, makeTreePath, dataGetter, dataSetter } from '@/utils'
   import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
-  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.js'
-  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.js'
-  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.js'
-  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.js'
-  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.js'
+  import MessageEditor from '@/components/mdm/input/ag-grid/MessageEditor.vue'
+  import MessageRenderer from '@/components/mdm/input/ag-grid/MessageRenderer.vue'
+  import RefEditor from '@/components/mdm/input/ag-grid/RefEditor.vue'
+  import RefRenderer from '@/components/mdm/input/ag-grid/RefRenderer.vue'
+  import NumberEditor from '@/components/mdm/input/ag-grid/NumberEditor.vue'
   import { useStore } from '@/store/store'
 
   export default defineComponent({
@@ -268,9 +268,8 @@
 
       const domainColumnDefs = ref([
         {headerName: 'ID', field: 'domainId'},
-        {headerName: 'NAME', valueGetter: messageGetter, valueSetter: messageSetter,
-          cellEditor: "messageEditor", cellRenderer: "messageRenderer", editable: true, width: 260},
-        {headerName: 'USE', width:120, field: 'isEnable', cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true},
+        {headerName: 'NAME', valueGetter: messageGetter, cellEditor: "messageEditor", cellRenderer: "messageRenderer", width: 260},
+        {headerName: 'USE', width:120, field: 'isEnable'},
       ])
 
       const columnDefs = ref([ 

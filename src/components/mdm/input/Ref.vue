@@ -152,7 +152,8 @@ import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
         },        
 
         pickMessage(params) {
-            let entityValue = eval('params.data.'+ this.entityId)
+            let funcEntity = new Function('params', 'return params.data.'+this.entityId)
+            let entityValue = funcEntity(params)
             this.message = messageGetter(params)
             this.$emit('pickEntityId', entityValue)            
         },
