@@ -161,8 +161,8 @@
              
               let masterData = {
                   "masterId": this.mode == 'EDIT' ? origin.master_id : null,
-                  "domainId": this.domainId,
-                  "classId": this.classId,
+                  "domainId": this.mode == 'EDIT' ? origin.domain_id : this.domainId,
+                  "classId":  this.mode == 'EDIT' ? origin.class_id : this.classId,
                   "data": data
               }
               return masterData   
