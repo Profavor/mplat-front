@@ -15,7 +15,9 @@
         </template>
         <template #extra>
           <n-space>
-            <n-button @click="showModal = true">Add</n-button>
+            <n-button @click="showFormModal('VIEW')">View Test</n-button>
+            <n-button @click="showFormModal('NEW')">Add</n-button>
+            <n-button @click="showFormModal('EDIT')">Edit</n-button>
             <n-button @click="remove">Delete</n-button>
           </n-space>
         </template>
@@ -39,6 +41,7 @@
                 class="ag-theme-alpine"
                 @cell-clicked="getMasterSelectedItem"
                 @grid-ready="gridReady2"
+                @cell-value-changed="cellValueChanged"
 
                 rowSelection="single"
                 :columnDefs="columnDefs"
@@ -65,7 +68,7 @@
           </n-button>
         </template>
         <n-space vertical>
-            <FormSection :domainId="domainId" :classId="classId" :columnData="columnData" ref="formSectionRef" />
+            <FormSection :domainId="domainId" :classId="classId" :columnData="columnData" ref="formSectionRef" :mode="mode" />
         </n-space>
         <template #footer>
           <n-space justify="end">
@@ -76,7 +79,6 @@
         </template>
       </n-card>
   </n-modal>
-
   </n-space>
 </template>
 
@@ -85,6 +87,7 @@
   import { defineComponent, ref, onMounted } from 'vue'
   import { messageGetter, messageSetter, makeTreePath, dataGetter } from '@/utils'
   import { useStore } from '@/store/store'
+  import { useMessage } from 'naive-ui'
   import { CloseOutline as CloseIcon } from '@vicons/ionicons5'
 
   export default defineComponent({
@@ -96,6 +99,7 @@
 
     setup(){
       const store = useStore()
+      const msg = useMessage()
       store.dispatch('domain/setDomainList')
 
       const columnDefs = ref([      
@@ -134,11 +138,14 @@
       })
 
       return {
+          msg,
           showModal: ref(false),
+          showDetailModal: ref(false),
           columnDefs,
           state: store?.state,
           classTreeData, 
-          classGridOption
+          classGridOption,
+          mode: ref('EDIT')
       }
     },
 
@@ -165,12 +172,7 @@
                 .then(res=> {
                     this.columnData = res
                     this.convertPropData(res)
-
-                    get({
-                        url: '/api/master/getData/'+this.domainId +'/'+this.classId
-                    }).then(res=> {
-                        this.gridApi2.setRowData(res)
-                    })
+                    this.loadData()
                 })
             }
         },
@@ -181,10 +183,10 @@
             })
         },
 
-        convertPropData(data) {
+        convertPropData(columns) {
             this.columnDefs = []
             this.columnDefs.push({headerName: "Master", children: [{headerName: "ID", width: 130, field: 'master_id'}]})
-            let sections = data.msections
+            let sections = columns.msections
             sections.sort(function(a, b){
                 return a.dispSeq - b.dispSeq
             }) 
@@ -210,9 +212,9 @@
                                         let date = new Date(params.value)       
                                         return moment(date).format('YYYY-MM-DD')
                                     }
-                                }})
-                            }else{
-                                group.children.push({headerName: props[k].message, width: props[k].width, field: props[k].propId})
+                                }, editable: (props[k].options.propMode == 'GENERAL')})
+                            }else{ 
+                                group.children.push({headerName: props[k].message, width: props[k].width, field: props[k].propId, editable: props[k].options.propMode != 'IDENTITY'})
                             }   
                         } 
                     }
@@ -221,8 +223,36 @@
             }
         },
 
-        getMasterSelectedItem(params) {
-            console.log(params)
+        getMasterSelectedItem(params) {           
+            let dataProp = JSON.parse(JSON.stringify(params.data))
+            delete dataProp.master_id
+            delete dataProp.domain_id
+            delete dataProp.class_id
+
+            let keys = Object.keys(dataProp)
+            let data = []
+
+            for(let i in keys){
+                data.push({
+                    propId: keys[i],
+                    value: dataProp[keys[i]]
+                })
+            }
+
+            let msections = this.columnData.msections
+            msections.forEach(section => {
+                let mgroups = section.mgroups
+                mgroups.forEach(group => {
+                    let props = group.props                    
+                    props.forEach(prop => {
+                        data.forEach(d => {
+                            if(prop.propId === d.propId){
+                                prop.value = d.value
+                            }
+                        })
+                    })
+                })
+            })
         },
 
         selectedClass(params){
@@ -251,12 +281,100 @@
 
         },
 
+        loadData() {
+            get({
+                url: '/api/master/getData/'+this.domainId +'/'+this.classId
+            }).then(res=> {
+                this.gridApi2.setRowData(res)
+            })
+        },
+
         saveData() {
             if(this.$refs.formSectionRef.validation()){
-                post({url: '/api/master', data: () => this.$refs.formSectionRef.getValue()}).then(res=> {
+                let selected = this.gridApi2.getSelectedRows()
+                post({url: '/api/master', data: () => this.$refs.formSectionRef.getValue(selected[0])}).then(res=> {
+                    this.loadData()
                     this.showModal = false
                 })
             }           
+        },
+
+        remove() {
+            let selected = this.gridApi2.getSelectedRows()
+            get({url: '/api/master/delete/'+selected[0].domain_id+'/'+selected[0].master_id}).then(res=> {
+                this.loadData()
+            })
+
+        },
+
+        cellValueChanged(params) {
+             post({
+                url: '/api/master',
+                data: this.getMasterData(params)
+            }).then(res=> {
+                this.msg.success('Success!!')
+            })
+        },
+
+        getMasterData(params) { 
+            let masterData = {
+                "masterId": params.data.master_id,
+                "domainId": params.data.domain_id,
+                "classId": params.data.class_id,
+                "data": [
+                    {"propId": params.colDef.field, "value": params.newValue}
+                ]
+            }
+            return masterData
+        },
+
+        showFormModal(mode){
+            this.mode = mode
+
+            if(mode == 'NEW'){
+                let msections = this.columnData.msections
+                msections.forEach(section => {
+                    let mgroups = section.mgroups
+                    mgroups.forEach(group => {
+                        let props = group.props                    
+                        props.forEach(prop => {
+                            prop.value = ''
+                        })
+                    })
+                })
+            }else {
+                let selected = this.gridApi2.getSelectedRows()
+                let dataProp = JSON.parse(JSON.stringify(selected[0]))
+                delete dataProp.master_id
+                delete dataProp.domain_id
+                delete dataProp.class_id
+
+                let keys = Object.keys(dataProp)
+                let data = []
+
+                for(let i in keys){
+                    data.push({
+                        propId: keys[i],
+                        value: dataProp[keys[i]]
+                    })
+                }
+                let msections = this.columnData.msections
+                msections.forEach(section => {
+                    let mgroups = section.mgroups
+                    mgroups.forEach(group => {
+                        let props = group.props                    
+                        props.forEach(prop => {
+                            data.forEach(d => {
+                                if(prop.propId === d.propId){
+                                    prop.value = d.value
+                                }
+                            })
+                        })
+                    })
+                })
+            }           
+
+            this.showModal = true
         }
     }
   })

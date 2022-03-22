@@ -83,14 +83,6 @@
             <n-input v-model:value="model.dbType" placeholder="Input" />
           </n-form-item>
 
-          <n-form-item label="Mode" path="propMode">
-            <n-select
-              v-model:value="model.propMode"
-              placeholder="Select"
-              :options="selectOptions"
-            />
-          </n-form-item>
-
           <n-form-item label="Width" path="width">
             <n-input-number v-model:value="model.width" clearable />
           </n-form-item>
@@ -170,7 +162,6 @@
          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: true},
         {headerName: 'Type', valueGetter: dataGetter, valueSetter: dataSetter, toColDef: { field: 'propType', entityId: 'type', entityColDef: typeColumnDefs, url: '/api/propTypes'},
          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: true},
-        {headerName: 'Mode', field: 'propMode', editable: true, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['IDENTITY', 'NAME', 'GENERAL']}},
         {headerName: 'DB Type', field: 'dbType', editable: true},
         {headerName: 'Unit', field: 'unit', editable: true},
         {headerName: 'Width', field: 'width', editable: true},
@@ -189,7 +180,6 @@
         reference: null,
         groupId: null,
         groupMessage: null,
-        propMode: null,
         unit: null,
         width: null,
         regex: null,
@@ -228,11 +218,6 @@
             trigger: ['blur', 'input'],
             message: 'Required'
           },
-          propMode: {
-            required: true,
-            trigger: ['blur', 'input'],
-            message: 'Required'
-          }, 
           typeMessage: {
             required: true,
             trigger: ['blur', 'input'],
@@ -292,7 +277,6 @@
           message:{
             messageId: this.model.messageId
           },
-          propMode: this.model.propMode,
           width: this.model.width,
           regex: this.model.regex,
           dbType: this.model.dbType,
@@ -346,7 +330,6 @@
                 message:{
                   messageId:  data.message.messageId
                 },
-                propMode: data.propMode,
                 width: data.width,
                 regex: data.regex,
                 dbType: data.dbType,

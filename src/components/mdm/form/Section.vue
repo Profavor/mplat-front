@@ -7,7 +7,7 @@
         pane-style="padding: 20px;"
 
         >
-        <n-tab-pane v-for="section in columnData.msections" :key="section.sectionId" :name="section.message">
+        <n-tab-pane v-for="section in dataProp.msections" :key="section.sectionId" :name="section.message">
           <n-card>
             <n-form ref="formRef"
                label-placement="left"
@@ -18,16 +18,16 @@
                }"
             >
               <template #header-extra></template>
-              <n-collapse default-expanded-names="1" accordion>
+              <n-collapse>
                 <n-collapse-item  v-for="group in section.mgroups" :key="group.groupId" :title="group.message">
-                  <n-form-item v-for="prop in group.props" :key="prop.propId" :label="prop.message" :path="prop.value">     
-                    <n-input v-if="prop.type === 'STRN'" v-model:value="prop.value"  />
-                    <n-input-number v-if="prop.type ==='NVAL'" v-model:value="prop.value" clearable >
+                  <n-form-item v-for="prop in group.props" :key="prop.propId" :label="prop.message" :path="prop.propId" >
+                    <n-input v-if="prop.type === 'STRN'" v-model:value="prop.value" :readonly="mode === 'VIEW' || (prop.options.propMode =='IDENTITY' && mode === 'EDIT')" />
+                    <n-input-number v-if="prop.type ==='NVAL'" v-model:value="prop.value" clearable :readonly="mode === 'VIEW'" >
                       <template #prefix>{{prop.unit}}</template>
                     </n-input-number>
-                    <n-date-picker v-if="prop.type === 'DATE'" v-model:value="prop.value" type="date" clearable />
-                    <InputFile v-if="prop.type === 'FILE'" />
-                    <InputCode v-if="prop.type === 'CODE'" v-model:value="prop.value" :codeGroupId="prop.reference" />
+                    <n-date-picker v-if="prop.type === 'DATE'" v-model:value="prop.value" type="date" clearable :readonly="mode === 'VIEW'" />
+                    <InputFile v-if="prop.type === 'FILE'"  :readonly="mode === 'VIEW'" />
+                    <InputCode v-if="prop.type === 'CODE'" v-model:value="prop.value" :codeGroupId="prop.reference" :readonly="mode === 'VIEW'" />
                   </n-form-item>               
                 </n-collapse-item>
               </n-collapse>
@@ -72,11 +72,18 @@
         isMasterCode: {
            type: Boolean,
            default: true
+        },
+        mode: {
+           type: String,
+           default: ''
         }
      },
     setup(props, {emit}) {
+       const dataProp = ref(props.columnData)
       
-      return {  }
+      return { 
+         dataProp
+       }
     },
 
     data() {
@@ -86,7 +93,19 @@
     },
 
    methods: {
-      getValue(){
+      getValue(origin){        
+         let originData = []
+         if(origin){
+            let keys = Object.keys(origin)
+
+            for(let i in keys){
+               originData.push({
+                  propId: keys[i],
+                  value: origin[keys[i]]
+               })
+            }
+         }  
+
          let data = []            
          for(let i in this.columnData.msections){
                let msections = this.columnData.msections[i]
@@ -95,23 +114,34 @@
                   for(let k in mgroups.props){
                      let props = mgroups.props[k]
                      if(props.value){
+                           let filter = originData.filter(s=> {
+                              return s.propId == props.propId && s.value != props.value
+                           })
+                           if(filter.length > 0){
+                              data.push({
+                                 propId: props.propId,
+                                 value: props.value,
+                              })
+                           }                           
+                     }else{
+                        let filter = originData.filter(s=> {
+                           return s.propId == props.propId && s.value != null
+                        })
+                        if(filter.length > 0){
                            data.push({
                               propId: props.propId,
-                              value: props.value,
+                              value: null
                            })
-                     }else{
-                        data.push({
-                           propId: props.propId,
-                           value: null
-                        })
+                        }
                      }
                   }
                }
             }
 
           if(this.isMasterCode){
+             
               let masterData = {
-                  "masterId": this.masterId,
+                  "masterId": this.mode == 'EDIT' ? origin.master_id : null,
                   "domainId": this.domainId,
                   "classId": this.classId,
                   "data": data

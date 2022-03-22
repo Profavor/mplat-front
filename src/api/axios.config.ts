@@ -20,7 +20,7 @@ const service = Axios.create({
 
 service.interceptors.request.use(
   (config) => {
-    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MDQ5MDI2LCJpYXQiOjE2NDc2ODkwMjZ9.UsiW_ZPWVTcnQdo5E7TZHMloQJx-3jdP_ZDLGKsIIaY'
+    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MjcyODQ2LCJpYXQiOjE2NDc5MTI4NDZ9.dtxS5aPQmmr7BeCeLuPyZhNhFcxXOzOHHpsZYsLVnWc'
     !config.headers && (config.headers = {})
     if (!config.headers[CONTENT_TYPE]) {
       config.headers[CONTENT_TYPE] = APPLICATION_JSON
@@ -45,9 +45,9 @@ service.interceptors.response.use(
   },
   (error) => {
     if (import.meta.env.MODE === 'development') {
-      console.log(error)
+      console.error(error.response.data.errorMessage)
     }
-    return Promise.reject({ code: 500, msg: 'Error' })
+    return Promise.reject({ code: 500, msg: error.response.data.errorMessage })
   }
 )
 

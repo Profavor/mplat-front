@@ -175,6 +175,13 @@
           </n-form-item>
           <n-form-item label="Prop" path="propId">
             <InputRef v-model:value="classPropModel.propMessage" placeholder="Input"  :columnDefs="propColumnDefs" :url="'/api/props'" entityId="propId"  @pickEntityId="setPropId" />
+          </n-form-item>
+          <n-form-item label="Mode" path="propMode">
+            <n-select
+              v-model:value="model.propMode"
+              placeholder="Select"
+              :options="selectOptions2"
+            />
           </n-form-item> 
           <n-form-item label="Display Seq" path="dispSeq">
             <n-input-number v-model:value="classPropModel.dispSeq" clearable />
@@ -265,7 +272,8 @@
         dispSeq: 0,
         isReadOnly: 'N',
         isDisabled: 'N',
-        isShow: 'Y'
+        isShow: 'Y',
+        propMode: 'GENERAL'
       })
 
       const domainColumnDefs = ref([
@@ -294,7 +302,6 @@
          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: false},
         {headerName: 'Type', valueGetter: dataGetter, toColDef: { field: 'propType', entityId: 'type'},
          cellEditor: "refEditor", cellRenderer: "refRenderer", editable: false},
-        {headerName: 'Mode', field: 'propMode', editable: false},
         {headerName: 'DB Type', field: 'dbType', editable: false},
         {headerName: 'Unit', field: 'unit', editable: false}
       ])
@@ -302,6 +309,7 @@
       const classPropColumnDefs = ref([
         { headerName: '속성ID', field: 'propId', width: 150 },
         { headerName: '속성명', field: 'propId'},
+        { headerName: 'Mode', field: 'propMode', editable: true, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['IDENTITY', 'NAME', 'GENERAL']}},
         { headerName: '보임', field: 'isShow', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
         { headerName: '읽기', field: 'isReadOnly', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
         { headerName: '수정', field: 'isDisabled', width: 80, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Y', 'N'], }, editable: true },
@@ -399,7 +407,21 @@
             label: 'N',
             value: 'N'
           }
-        ],        
+        ],
+        selectOptions2: [
+          {
+            label: "Identity",
+            value: 'IDENTITY',
+          },
+          {
+            label: 'Name',
+            value: 'NAME'
+          },
+          {
+            label: 'General',
+            value: 'GENERAL'
+          },
+        ],         
       }
     },
 
@@ -484,7 +506,8 @@
           isReadOnly: this.classPropModel.isReadOnly,
           isDisabled: this.classPropModel.isDisabled,
           isShow: this.classPropModel.isShow,
-          dispSeq: this.classPropModel.dispSeq
+          dispSeq: this.classPropModel.dispSeq,
+          propMode: this.classPropModel.propMode,
         }
       },
 
@@ -567,7 +590,8 @@
           isReadOnly: data.isReadOnly,
           isDisabled: data.isDisabled,
           isShow: data.isShow,
-          dispSeq: data.dispSeq
+          dispSeq: data.dispSeq,
+          propMode: data.propMode
         }
       },
 
@@ -588,6 +612,9 @@
             }).then(res=> {
                 this.msg.success('Success!!')
                 this.showMessageModal = false
+            }).catch(error=> {
+              this.msg.error(error.message)
+              this.loadClassPropData(params.data.classId)
             })
         },
       setParentId(parentId){
