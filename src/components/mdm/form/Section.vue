@@ -113,25 +113,44 @@
                   let mgroups = msections.mgroups[j]
                   for(let k in mgroups.props){
                      let props = mgroups.props[k]
-                     if(props.value){
-                           let filter = originData.filter(s=> {
-                              return s.propId == props.propId && s.value != props.value
-                           })
-                           if(filter.length > 0){
+                     if(props.value){                           
+                           if(this.mode === 'NEW'){
                               data.push({
                                  propId: props.propId,
                                  value: props.value,
                               })
-                           }                           
-                     }else{
-                        let filter = originData.filter(s=> {
-                           return s.propId == props.propId && s.value != null
-                        })
-                        if(filter.length > 0){
+                           }else{
+                              let filter = originData.filter(s=> {
+                                 return s.propId == props.propId
+                              })
+                              if(filter.length > 0 && filter[0].value != props.value){
+                                 data.push({
+                                    propId: props.propId,
+                                    value: props.value,
+                                 })  
+                              }else if(filter.length == 0){
+                                 data.push({
+                                    propId: props.propId,
+                                    value: props.value,
+                                 })  
+                              }                                                                
+                           }                    
+                     }else{                        
+                        if(this.mode === 'NEW'){
                            data.push({
                               propId: props.propId,
                               value: null
                            })
+                        }else{
+                           let filter = originData.filter(s=> {
+                              return s.propId == props.propId
+                           })
+                           if(filter.length > 0 && filter[0].value != null){
+                              data.push({
+                                 propId: props.propId,
+                                 value: null,
+                              })  
+                           }    
                         }
                      }
                   }

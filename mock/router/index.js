@@ -11,14 +11,9 @@ export const adminRoutes = [
     children: [
       {
         parentPath: '/mdm',
-        menuUrl: '/mdm/form',
-        menuName: 'Form',
-        cacheable: true,
-      },
-      {
-        parentPath: '/mdm',
         menuUrl: '/mdm/data',
         menuName: 'Data',
+        badge: 'new',
         cacheable: true,
       },
       {
@@ -44,7 +39,6 @@ export const adminRoutes = [
             parentPath: '/mdm/manage',
             menuUrl: '/mdm/manage/prop',
             menuName: 'Prop',
-            badge: 'new',
             cacheable: true,
           },
           {
@@ -68,8 +62,7 @@ export const adminRoutes = [
           {
             parentPath: '/mdm/manage',
             menuUrl: '/mdm/manage/area',
-            menuName: 'Area',
-            badge: 'new',
+            menuName: 'Area',            
             cacheable: true,
           },
         ]
