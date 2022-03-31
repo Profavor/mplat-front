@@ -18,6 +18,21 @@ export const adminRoutes = [
       },
       {
         parentPath: '/mdm',
+        menuUrl: '/mdm/component',
+        menuName: 'Component',
+        icon: 'setting',
+        cacheable: true,
+        children: [
+          {
+            parentPath: '/mdm/component',
+            menuUrl: '/mdm/component/file',
+            menuName: 'File', 
+            cacheable: true,
+          },
+        ]
+      },
+      {
+        parentPath: '/mdm',
         menuUrl: '/mdm/manage',
         menuName: 'Manage',
         icon: 'setting',

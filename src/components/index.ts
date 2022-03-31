@@ -47,6 +47,7 @@ import {
   NRadioButton,
   NDatePicker,
   NTimePicker,
+  NTime,
   NSelect,
   NTable,
   NDataTable,
@@ -78,7 +79,9 @@ import {
   NUploadDragger,
   NUploadFileList,
   NUploadTrigger,
-  NPageHeader
+  NPageHeader,
+  NCode,
+  NList
 } from 'naive-ui'
 import store from '../store'
 import { App, inject } from 'vue'
@@ -139,6 +142,7 @@ function registerElement(app: App) {
       NRadioButton,
       NDatePicker,
       NTimePicker,
+      NTime,
       NSelect,
       NTree,
       NTreeSelect,
@@ -169,7 +173,9 @@ function registerElement(app: App) {
       NUploadFileList,
       NUploadTrigger,
       NPageHeader,
-      NGradientText
+      NGradientText,
+      NCode,
+      NList
     ],
   })
   app.use(navie)

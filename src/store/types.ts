@@ -5,6 +5,7 @@ export interface RootState {
 export interface AppState {
   version: string
   appName: string
+  progress: number
 }
 
 export interface UserState {

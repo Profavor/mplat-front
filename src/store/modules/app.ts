@@ -7,6 +7,7 @@ export const appModule: Module<AppState, RootState> = {
   state: {
     version: packageJson.version,
     appName: packageJson.name,
+    progress: 0
   },
   getters: {
     getVersion(state): string {
@@ -15,15 +16,24 @@ export const appModule: Module<AppState, RootState> = {
     getAppName(state): string {
       return state.appName
     },
+    getProgress(state): number {
+      return state.progress
+    }
   },
   actions: {
     changeVersion({ commit }, newVersion) {
       commit('CHANGE_VERSION', newVersion)
     },
+    setProgress({ commit }, newProgress) {
+      commit('SET_PROGRESS', newProgress)
+    }
   },
   mutations: {
     CHANGE_VERSION(state, newVersion) {
       state.version = newVersion
     },
+    SET_PROGRESS(state, newProgress) {
+      state.progress = newProgress
+    }
   },
 }

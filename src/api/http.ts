@@ -107,6 +107,7 @@ export default {
   install,
   get,
   post,
+  del
 }
 
 declare module '@vue/runtime-core' {

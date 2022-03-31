@@ -44,6 +44,7 @@
   import { computed, defineComponent, onBeforeUnmount, onMounted } from 'vue'
   import { DeviceType } from '../types/store'
   import { useLayoutStore } from './index'
+
   export default defineComponent({
     name: 'Layout',
     setup() {

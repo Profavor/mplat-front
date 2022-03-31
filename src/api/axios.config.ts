@@ -1,8 +1,8 @@
 import Axios, { AxiosResponse } from 'axios'
 import qs from 'qs'
 
-export const baseURL = 'http://prusoft.synology.me:28080/'
-//export const baseURL = 'http://localhost:8080/'
+//export const baseURL = 'http://prusoft.synology.me:28080/'
+export const baseURL = 'http://localhost:8080/'
 
 export const CONTENT_TYPE = 'Content-Type'
 
@@ -18,9 +18,11 @@ const service = Axios.create({
   withCredentials: true,
 })
 
+sessionStorage.setItem('token', 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ5MDU0OTUzLCJpYXQiOjE2NDg2OTQ5NTN9.6kR7VYY5Kx4tigK3ydYVC6OqVgjJXMT-8HMVhOGRU0A')
+
 service.interceptors.request.use(
   (config) => {
-    config.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUZXN0IEpXVCIsImp0aSI6ImFiY2RlZiIsImlzcyI6InByb2Zhdm9yIiwiZXhwIjoxNjQ4MjcyODQ2LCJpYXQiOjE2NDc5MTI4NDZ9.dtxS5aPQmmr7BeCeLuPyZhNhFcxXOzOHHpsZYsLVnWc'
+    config.headers['Authorization'] = sessionStorage.getItem('token')
     !config.headers && (config.headers = {})
     if (!config.headers[CONTENT_TYPE]) {
       config.headers[CONTENT_TYPE] = APPLICATION_JSON

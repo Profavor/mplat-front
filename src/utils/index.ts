@@ -484,6 +484,39 @@ export function makeTreePath(arr2: any, id: any, parentId: any, children: any){
     return data
 }
 
+export function leftPad(value: Number) {
+  if(value >= 10) {
+    return value;
+  }
+
+  return `0${value}`
+}
+
+export function dateFormat(source: Date, delimiter: string = '-'){
+  const year = source.getFullYear()
+  const month = leftPad(source.getMonth() + 1)
+  const day = leftPad(source.getDate())
+  const hour = leftPad(source.getHours())
+  const minute = leftPad(source.getMinutes())
+  const second = leftPad(source.getSeconds())
+
+  return [year, month, day].join(delimiter) +' '+ [hour, minute, second].join(':')
+}
+
+export function fileSizeFormat(size: any){
+  if (size > 1024 * 1024 * 1024 * 1024) {
+      return (size / 1024 / 1024 / 1024 / 1024).toFixed(2) + ' TB'
+  } else if (size > 1024 * 1024 * 1024) {
+      return (size / 1024 / 1024 / 1024).toFixed(2) + ' GB'
+  } else if (size > 1024 * 1024) {
+      return (size / 1024 / 1024).toFixed(2) + ' MB'
+  } else if (size > 1024) {
+      return (size / 1024).toFixed(2) + ' KB'
+  }
+  return size.toString() + ' B'
+}
+
+
 class Queue {
   _arr:any = []
 
